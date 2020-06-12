@@ -8,7 +8,6 @@
         <v-list-item
             v-for="item in drawerData"
             :key="item.title"
-            @click="click"
             link
             :to="item.targetPath"
           >
