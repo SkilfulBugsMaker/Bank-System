@@ -209,18 +209,63 @@
               </v-card>
               <v-card flat class="my-4 px-4">
                 <v-row>
-                    <v-col cols="2" offset="4">
-                      <v-btn :disabled="!commitBtnValid" color="success" @click="commitForm">Commit</v-btn>
-                    </v-col>
-                    <v-col cols="2">
-                      <v-btn :disabled="!resetBtnValid" color="warning" @click="resetForm">Reset</v-btn>
-                    </v-col>
-                  </v-row>
+                  <v-col cols="2" offset="4">
+                    <v-btn :disabled="!commitBtnValid" color="success" @click="commitForm">Commit</v-btn>
+                  </v-col>
+                  <v-col cols="2">
+                    <v-btn :disabled="!resetBtnValid" color="warning" @click="resetForm">Reset</v-btn>
+                  </v-col>
+                </v-row>
               </v-card>
               <v-divider class="py-2"></v-divider>
-              
-              <v-card outlined>
-                <v-card-title> {{ cardStatusTitle[idx] }}</v-card-title>
+
+              <v-card flat v-if="idx!=3 && receiveData != '' && receiveData.tab==idx">
+                <v-card-title>{{ cardStatusTitle[idx] }}</v-card-title>
+                <v-card-text>
+                  {{ receiveData.message }}
+                </v-card-text>
+              </v-card>
+
+              <v-card flat v-if="idx==3 && receiveData != '' && receiveData.tab==idx">
+                <v-card-title>{{ cardStatusTitle[idx] }}</v-card-title>
+                <v-card-text>
+                  {{ receiveData.message }}
+                </v-card-text>
+
+                <v-simple-table>
+                  <template v-slot:default>
+                    <thead>
+                      <tr>
+                        <th class="text-left">Index</th>
+                        <th class="text-left">Customer ID</th>
+                        <th class="text-left">Customer Name</th>
+                        <th class="text-left">Customer Phone</th>
+                        <th class="text-left">Customer Address</th>
+                        <th class="text-left">Contact Name</th>
+                        <th class="text-left">Contact Phone</th>
+                        <th class="text-left">Contact Email</th>
+                        <th class="text-left">Contact Relationship</th>
+                        <th class="text-left">Loan Staff ID</th>
+                        <th class="text-left">Account Staff ID</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr v-for="(ds, index) in receiveData.data" :key="index">
+                        <td>{{ index }}</td>
+                        <td>{{ ds.customer_id }}</td>
+                        <td>{{ ds.customer_name }}</td>
+                        <td>{{ ds.customer_phone }}</td>
+                        <td>{{ ds.customer_address }}</td>
+                        <td>{{ ds.contact_name }}</td>
+                        <td>{{ ds.contact_phone }}</td>
+                        <td>{{ ds.contact_email }}</td>
+                        <td>{{ ds.contact_relationship }}</td>
+                        <td>{{ ds.loan_staff_id }}</td>
+                        <td>{{ ds.account_staff_id }}</td>
+                      </tr>
+                    </tbody>
+                  </template>
+                </v-simple-table>
               </v-card>
             </v-tab-item>
           </v-tabs-items>
@@ -244,10 +289,10 @@ export default {
       "需要搜索的用户信息"
     ],
     cardStatusTitle: [
-      "创建用户状态",
-      "删除用户状态",
-      "更新用户状态",
-      "搜索用户状态"
+      "创建用户结果",
+      "删除用户结果",
+      "更新用户结果",
+      "搜索用户结果"
     ],
     inputData: {
       id: "",
@@ -272,66 +317,101 @@ export default {
       contactPhone: "",
       contactEmail: "",
       contactRelationship: ""
-    }
+    },
+    receiveData: ""
   }),
   computed: {
-    formOneEmpty: function () {
-      let result = (this.inputData['id'].length == 0)
+    formOneEmpty: function() {
+      let result = this.inputData["id"].length == 0;
       for (let item in this.inputData) {
-        result = result && (this.inputData[item].length == 0)
+        result = result && this.inputData[item].length == 0;
       }
-      return result
+      return result;
     },
-    formTwoEmpty: function () {
-      let result = (this.modifyData['id'].length == 0)
+    formTwoEmpty: function() {
+      let result = this.modifyData["id"].length == 0;
       for (let item in this.modifyData) {
-        result = result && (this.modifyData[item].length == 0)
+        result = result && this.modifyData[item].length == 0;
       }
-      return result
+      return result;
     },
-    checkFormOneCreate: function () {
-      let result = true
+    checkFormOneCreate: function() {
+      let result = true;
       for (let item in this.inputData) {
-        if (item == 'loanStaffID' || item == 'accountStaffID') {
-          continue
+        if (item == "loanStaffID" || item == "accountStaffID") {
+          continue;
         }
-        result = result && (this.inputData[item] != '')
+        result = result && this.inputData[item] != "";
       }
-      return result
+      return result;
     },
-    resetBtnValid: function () {
-      let result = false
+    resetBtnValid: function() {
+      let result = false;
       if (this.tab == 2) {
         // if modify
-        result = (!this.formOneEmpty) || (!this.formTwoEmpty)
+        result = !this.formOneEmpty || !this.formTwoEmpty;
       } else {
-        result = !this.formOneEmpty
+        result = !this.formOneEmpty;
       }
-      return result
+      return result;
     },
-    commitBtnValid: function () {
-      let result = false
+    commitBtnValid: function() {
+      let result = false;
       if (this.tab == 0) {
         // if modify
-        result = this.checkFormOneCreate
+        result = this.checkFormOneCreate;
       } else if (this.tab == 1) {
-        result = !this.formOneEmpty
+        result = !this.formOneEmpty;
       } else if (this.tab == 2) {
-        result = (!this.formOneEmpty) && (!this.formTwoEmpty)
+        result = !this.formOneEmpty && !this.formTwoEmpty;
       } else {
-        result = !this.formOneEmpty
+        result = !this.formOneEmpty;
       }
-      return result
+      return result;
     },
+    postData: function() {
+      let result = {
+        tab: this.tab.toString(),
+        customer_id: this.inputData.id,
+        customer_name: this.inputData.name,
+        customer_phone: this.inputData.phone,
+        customer_address: this.inputData.address,
+        contact_name: this.inputData.contactName,
+        contact_phone: this.inputData.contactPhone,
+        contact_email: this.inputData.contactEmail,
+        contact_relationship: this.inputData.contactRelationship,
+        loan_staff_id: this.inputData.loanStaffID,
+        account_staff_id: this.inputData.accountStaffID,
+
+        m_customer_id: this.modifyData.id,
+        m_customer_name: this.modifyData.name,
+        m_customer_phone: this.modifyData.phone,
+        m_customer_address: this.modifyData.address,
+        m_contact_name: this.modifyData.contactName,
+        m_contact_phone: this.modifyData.contactPhone,
+        m_contact_email: this.modifyData.contactEmail,
+        m_contact_relationship: this.modifyData.contactRelationship,
+        m_loan_staff_id: this.modifyData.loanStaffID,
+        m_account_staff_id: this.modifyData.accountStaffID
+      };
+      return result;
+    }
   },
   methods: {
-    resetForm: function () {
+    resetForm: function() {
       for (let item in this.inputData) {
-        this.inputData[item] = ''
+        this.inputData[item] = "";
       }
     },
-    commitForm: function () {
-      alert(this.checkFormOneCreate)
+    commitForm: function() {
+      this.$axios
+        .post("/customer-management", this.postData)
+        .then(response => {
+          this.receiveData = response.data;
+        })
+        .catch(function(error) {
+          alert(error);
+        });
     }
   }
 };

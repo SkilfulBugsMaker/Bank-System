@@ -76,6 +76,31 @@
                     </v-col>
                   </v-row>
                   <v-row>
+                    <v-col cols="3">
+                      <v-menu
+                        v-model="tabMenu2[idx].menu1"
+                        :close-on-content-click="false"
+                        transition="scale-transition"
+                        offset-y
+                      >
+                        <template v-slot:activator="{ on, attrs }">
+                          <v-text-field
+                            v-model="inputData.lastVisitDate"
+                            label="Account Last Visit Date"
+                            outlined
+                            dense
+                            readonly
+                            v-bind="attrs"
+                            v-on="on"
+                          ></v-text-field>
+                        </template>
+                        <v-date-picker
+                          v-model="inputData.lastVisitDate"
+                          no-title
+                          @input="tabMenu2[idx].menu1 = false"
+                        ></v-date-picker>
+                      </v-menu>
+                    </v-col>
                     <v-col cols="2">
                       <v-text-field
                         v-model="inputData.customerID"
@@ -182,6 +207,31 @@
                     </v-col>
                   </v-row>
                   <v-row>
+                    <v-col cols="3">
+                      <v-menu
+                        v-model="tabMenu2[idx].menu2"
+                        :close-on-content-click="false"
+                        transition="scale-transition"
+                        offset-y
+                      >
+                        <template v-slot:activator="{ on, attrs }">
+                          <v-text-field
+                            v-model="modifyData.lastVisitDate"
+                            label="Account Last Visit Date"
+                            outlined
+                            dense
+                            readonly
+                            v-bind="attrs"
+                            v-on="on"
+                          ></v-text-field>
+                        </template>
+                        <v-date-picker
+                          v-model="modifyData.lastVisitDate"
+                          no-title
+                          @input="tabMenu2[idx].menu2 = false"
+                        ></v-date-picker>
+                      </v-menu>
+                    </v-col>
                     <v-col cols="2">
                       <v-text-field
                         v-model="modifyData.customerID"
@@ -267,6 +317,24 @@ export default {
         menu2: false
       }
     ],
+    tabMenu2: [
+      {
+        menu1: false,
+        menu2: false
+      },
+      {
+        menu1: false,
+        menu2: false
+      },
+      {
+        menu1: false,
+        menu2: false
+      },
+      {
+        menu1: false,
+        menu2: false
+      }
+    ],
     tab: 0,
     operations: ["Create", "Delete", "Modify", "Search"],
     cardOneTitle: [
@@ -290,7 +358,8 @@ export default {
       savingsAccountRate: "",
       savingsAccountCurrencyType: "",
       openBank: "",
-      customerID: ""
+      customerID: "",
+      lastVisitDate: ""
     },
     modifyData: {
       id: "",
@@ -301,7 +370,8 @@ export default {
       savingsAccountRate: "",
       savingsAccountCurrencyType: "",
       openBank: "",
-      customerID: ""
+      customerID: "",
+      lastVisitDate: ""
     }
   }),
   computed: {

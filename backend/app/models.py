@@ -40,28 +40,46 @@ class Customer(db.Model):
     c_loan_staff_identity_code = db.Column(
         db.String(IDENTITY_CODE_LEN),
         db.ForeignKey('staff.s_identity_code'),
-        nullable=False
+        nullable=True
     )
     c_account_staff_identity_code = db.Column(
         db.String(IDENTITY_CODE_LEN),
         db.ForeignKey('staff.s_identity_code'),
-        nullable=False
+        nullable=True
     )
     # end foreign keys
 
-    def __init__(self, id, name, phone, address, c_name, c_phone, c_email, c_relationship, loan_staff=None, account_staff=None):
-        self.c_identity_code = id
-        self.c_name = name
-        self.c_phone = phone
-        self.c_address = address
-        self.c_contact_name = c_name
-        self.c_contact_email = c_email
-        self.c_contact_phone = c_phone
-        self.c_contact_relationship = c_relationship
-        if loan_staff is not None:
-            self.c_loan_staff_identity_code = loan_staff
-        if account_staff is not None:
-            self.c_account_staff_identity_code = account_staff
+    def __init__(
+            self, c_identity_code, c_name, c_phone, c_address, c_contact_name,
+            c_contact_email, c_contact_phone, c_contact_relationship,
+            c_loan_staff_identity_code=None, c_account_staff_identity_code=None):
+        self.c_identity_code = c_identity_code
+        self.c_name = c_name
+        self.c_phone = c_phone
+        self.c_address = c_address
+        self.c_contact_name = c_contact_name
+        self.c_contact_email = c_contact_email
+        self.c_contact_phone = c_contact_phone
+        self.c_contact_relationship = c_contact_relationship
+        if c_loan_staff_identity_code is not None:
+            self.c_loan_staff_identity_code = c_loan_staff_identity_code
+        if c_account_staff_identity_code is not None:
+            self.c_account_staff_identity_code = c_account_staff_identity_code
+
+    def to_json(self):
+        return {
+            'c_identity_code': self.c_identity_code,
+            'c_name': self.c_name,
+            'c_phone': self.c_phone,
+            'c_address': self.c_address,
+            'c_contact_name': self.c_contact_name,
+            'c_contact_email': self.c_contact_email,
+            'c_contact_phone': self.c_contact_phone,
+            'c_contact_relationship': self.c_contact_relationship,
+            'c_loan_staff_identity_code': self.c_loan_staff_identity_code,
+            'c_account_staff_identity_code': self.c_account_staff_identity_code
+        }
+
     pass
 
 
@@ -82,14 +100,16 @@ class Staff(db.Model):
     )
     # end foreign keys
 
-    def __init__(self, id, name, phone, address, start_work_date, department_id=None):
-        self.s_identity_code = id
-        self.s_name = name
-        self.s_phone = phone
-        self.s_address = address
-        self.s_start_work_date = start_work_date
-        if department_id is not None:
-            self.s_d_code = department_id
+    def __init__(
+            self, s_identity_code, s_name, s_phone, s_address,
+            s_start_work_date, s_d_code=None):
+        self.s_identity_code = s_identity_code
+        self.s_name = s_name
+        self.s_phone = s_phone
+        self.s_address = s_address
+        self.s_start_work_date = s_start_work_date
+        if s_d_code is not None:
+            self.s_d_code = s_d_code
     pass
 
 
@@ -104,10 +124,10 @@ class SubBank(db.Model):
     # no foreign key
     # end foreign keys
 
-    def __init__(self, name, city, assets):
-        self.sb_name = name
-        self.sb_city = city
-        self.sb_assets = assets
+    def __init__(self, sb_name, sb_city, sb_assets):
+        self.sb_name = sb_name
+        self.sb_city = sb_city
+        self.sb_assets = sb_assets
 
     pass
 
@@ -132,14 +152,14 @@ class Department(db.Model):
     )
     # end foreign keys
 
-    def __init__(self, id, name, type, m_id=None, sb_name=None):
-        self.d_code = id
-        self.d_name = name
-        self.d_type = type
-        if m_id is not None:
-            self.d_m_identity_code = m_id
-        if sb_name is not None:
-            self.d_sb_name = sb_name
+    def __init__(self, d_code, d_name, d_type, d_m_identity_code=None, d_sb_name=None):
+        self.d_code = d_code
+        self.d_name = d_name
+        self.d_type = d_type
+        if d_m_identity_code is not None:
+            self.d_m_identity_code = d_m_identity_code
+        if d_sb_name is not None:
+            self.d_sb_name = d_sb_name
 
     pass
 
@@ -160,10 +180,10 @@ class Manager(db.Model):
     )
     # end foreign keys
 
-    def __init__(self, id, d_id=None):
-        self.m_identity_code = id
-        if d_id is not None:
-            self.m_d_code = d_id
+    def __init__(self, m_identity_code, m_d_code=None):
+        self.m_identity_code = m_identity_code
+        if m_d_code is not None:
+            self.m_d_code = m_d_code
 
     pass
 
@@ -179,10 +199,10 @@ class Account(db.Model):
     # no foreign keys
     # end foreign keys
 
-    def __init__(self, id, balance, open_date):
-        self.a_code = id
-        self.a_balance = balance
-        self.a_open_date = open_date
+    def __init__(self, a_code, a_balance, a_open_date):
+        self.a_code = a_code
+        self.a_balance = a_balance
+        self.a_open_date = a_open_date
 
     pass
 
@@ -200,9 +220,9 @@ class CheckingAccount(db.Model):
     )
     # end foreign keys
 
-    def __init__(self, credit, a_id):
-        self.ca_credit = float(credit)
-        self.ca_a_code = a_id
+    def __init__(self, ca_credit, ca_a_code):
+        self.ca_credit = float(ca_credit)
+        self.ca_a_code = ca_a_code
 
     pass
 
@@ -221,10 +241,10 @@ class SavingsAccount(db.Model):
     )
     # end foreign keys
 
-    def __init__(self, rate, c_type, a_id):
-        self.sa_rate = float(rate)
-        self.sa_currency_type = c_type
-        self.sa_a_code = a_id
+    def __init__(self, sa_rate, sa_currency_type, sa_a_code):
+        self.sa_rate = float(sa_rate)
+        self.sa_currency_type = sa_currency_type
+        self.sa_a_code = sa_a_code
 
     pass
 
@@ -243,11 +263,11 @@ class Loan(db.Model):
     )
     # end foreign keys
 
-    def __init__(self, id, money, sb_name=None):
-        self.l_code = id
-        self.l_money = money
-        if sb_name is not None:
-            self.l_sb_name = sb_name
+    def __init__(self, l_code, l_money, l_sb_name=None):
+        self.l_code = l_code
+        self.l_money = l_money
+        if l_sb_name is not None:
+            self.l_sb_name = l_sb_name
 
     pass
 
@@ -267,11 +287,11 @@ class LoanPayment(db.Model):
     )
     # end foreign keys
 
-    def __init__(self, lp_id, lp_date, lp_money, l_id):
-        self.lp_code = lp_id
+    def __init__(self, lp_code, lp_date, lp_money, lp_l_code):
+        self.lp_code = lp_code
         self.lp_date = lp_date
         self.lp_money = lp_money
-        self.lp_l_code = l_id
+        self.lp_l_code = lp_l_code
 
     pass
 
@@ -299,11 +319,11 @@ class CheckingAccountRecord(db.Model):
     )
     # end foreign keys
 
-    def __init__(self, c_id, sb_name, a_id, la):
-        self.car_c_identity_code = c_id
-        self.car_sb_name = sb_name
-        self.car_a_code = a_id
-        self.car_last_visit_time = la
+    def __init__(self, car_c_identity_code, car_sb_name, car_a_code, car_last_visit_time):
+        self.car_c_identity_code = car_c_identity_code
+        self.car_sb_name = car_sb_name
+        self.car_a_code = car_a_code
+        self.car_last_visit_time = car_last_visit_time
 
     pass
 
@@ -331,11 +351,11 @@ class SavingsAccountRecord(db.Model):
     )
     # end foreign keys
 
-    def __init__(self, c_id, sb_name, a_id, la):
-        self.sar_c_identity_code = c_id
-        self.sar_sb_name = sb_name
-        self.sar_a_code = a_id
-        self.sar_last_visit_time = la
+    def __init__(self, sar_c_identity_code, sar_sb_name, sar_a_code, sar_last_visit_time):
+        self.sar_c_identity_code = sar_c_identity_code
+        self.sar_sb_name = sar_sb_name
+        self.sar_a_code = sar_a_code
+        self.sar_last_visit_time = sar_last_visit_time
 
 
     pass
@@ -359,9 +379,9 @@ class LoanCustomer(db.Model):
     )
     # end foreign keys
 
-    def __init__(self, l_id, c_id):
-        self.lc_l_code = l_id
-        self.lc_c_identity_code = c_id
+    def __init__(self, lc_l_code, lc_c_identity_code):
+        self.lc_l_code = lc_l_code
+        self.lc_c_identity_code = lc_c_identity_code
 
     pass
 
