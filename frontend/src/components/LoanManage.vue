@@ -15,10 +15,10 @@
                 </v-tabs>
                 <v-tabs-items v-model="tabIn">
                   <v-tab-item v-for="(opIn, idxIn) in operationsIn" :key="idxIn">
-                    <v-card outlined class="my-4 px-4">
+                    <v-card outlined class="my-4 px-4" v-if="idxOut==0">
                       <v-card-title>{{ cardTitle[idxOut][idxIn] }}</v-card-title>
-                      <v-form>
-                        <v-row v-if="idxOut==0">
+                      <v-form v-model="formCheck_0">
+                        <v-row>
                           <v-col cols="2">
                             <v-text-field
                               v-model="inputDataLoan.id"
@@ -43,12 +43,29 @@
                               counter="256"
                               label="Loan Money"
                               outlined
+                              :rules="[v => (v == '' || /^[+]{0,1}(\d+)$|^[+]{0,1}(\d+\.\d+)$/.test(v) || 'Invalid input!')]"
+                              dense
+                            ></v-text-field>
+                          </v-col>
+                        </v-row>
+                      </v-form>
+                    </v-card>
+                    <v-card outlined class="my-4 px-4" v-if="idxOut==1">
+                      <v-card-title>{{ cardTitle[idxOut][idxIn] }}</v-card-title>
+                      <v-form v-model="formCheck_1">
+                        <v-row>
+                          <v-col cols="2">
+                            <v-text-field
+                              v-model="inputDataOwner.loanID"
+                              counter="256"
+                              label="Loan ID"
+                              outlined
                               dense
                             ></v-text-field>
                           </v-col>
                           <v-col cols="2">
                             <v-text-field
-                              v-model="inputDataLoan.customerID"
+                              v-model="inputDataOwner.customerID"
                               counter="256"
                               label="Customer ID"
                               outlined
@@ -56,7 +73,12 @@
                             ></v-text-field>
                           </v-col>
                         </v-row>
-                        <v-row v-if="idxOut==1">
+                      </v-form>
+                    </v-card>
+                    <v-card outlined class="my-4 px-4" v-if="idxOut==2">
+                      <v-card-title>{{ cardTitle[idxOut][idxIn] }}</v-card-title>
+                      <v-form v-model="formCheck_1">
+                        <v-row>
                           <v-col cols="2">
                             <v-text-field
                               v-model="inputDataLoanPayment.loanID"
@@ -81,6 +103,7 @@
                               counter="256"
                               label="Loan Payment Money"
                               outlined
+                              :rules="[v => (v == '' || /^[+]{0,1}(\d+)$|^[+]{0,1}(\d+\.\d+)$/.test(v) || 'Invalid input!')]"
                               dense
                             ></v-text-field>
                           </v-col>
@@ -128,8 +151,92 @@
                     </v-card>
                     <v-divider class="py-2"></v-divider>
 
-                    <v-card outlined>
+                    <v-card
+                      flat
+                      v-if="idxIn!=2 && receiveData != '' && receiveData.tab_in==idxIn && receiveData.tab_out==idxOut"
+                    >
                       <v-card-title>{{ cardStatusTitle[idxOut][idxIn] }}</v-card-title>
+                      <v-card-text>{{ receiveData.message }}</v-card-text>
+                    </v-card>
+                    <v-card
+                      flat
+                      v-if="idxOut==0 && idxIn==2 && receiveData != '' && receiveData.tab_in==idxIn && receiveData.tab_out==idxOut"
+                    >
+                      <v-card-title>{{ cardStatusTitle[idxOut][idxIn] }}</v-card-title>
+                      <v-simple-table>
+                        <template v-slot:default>
+                          <thead>
+                            <tr>
+                              <th class="text-left">Index</th>
+                              <th class="text-left">Loan ID</th>
+                              <th class="text-left">Bank Name</th>
+                              <th class="text-left">Loan Money</th>
+                              <th class="text-left">Loan Status</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr v-for="(ds, index) in receiveData.data" :key="index">
+                              <td>{{ index }}</td>
+                              <td>{{ ds.loan_id }}</td>
+                              <td>{{ ds.bank_name }}</td>
+                              <td>{{ ds.money }}</td>
+                              <td>{{ ds.loan_status }}</td>        
+                            </tr>
+                          </tbody>
+                        </template>
+                      </v-simple-table>
+                    </v-card>
+                    <v-card
+                      flat
+                      v-if="idxOut==1 && idxIn==2 && receiveData != '' && receiveData.tab_in==idxIn && receiveData.tab_out==idxOut"
+                    >
+                      <v-card-title>{{ cardStatusTitle[idxOut][idxIn] }}</v-card-title>
+                      <v-simple-table>
+                        <template v-slot:default>
+                          <thead>
+                            <tr>
+                              <th class="text-left">Index</th>
+                              <th class="text-left">Loan ID</th>
+                              <th class="text-left">Customer ID</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr v-for="(ds, index) in receiveData.data" :key="index">
+                              <td>{{ index }}</td>
+                              <td>{{ ds.loan_id }}</td>
+                              <td>{{ ds.customer_id }}</td>     
+                            </tr>
+                          </tbody>
+                        </template>
+                      </v-simple-table>
+                    </v-card>
+                    <v-card
+                      flat
+                      v-if="idxOut==2 && idxIn==2 && receiveData != '' && receiveData.tab_in==idxIn && receiveData.tab_out==idxOut"
+                    >
+                      <v-card-title>{{ cardStatusTitle[idxOut][idxIn] }}</v-card-title>
+                      <v-simple-table>
+                        <template v-slot:default>
+                          <thead>
+                            <tr>
+                              <th class="text-left">Index</th>
+                              <th class="text-left">Loan ID</th>
+                              <th class="text-left">Loan Payment ID</th>
+                              <th class="text-left">Loan Payment Date</th>
+                              <th class="text-left">Loan Payment Money</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr v-for="(ds, index) in receiveData.data" :key="index">
+                              <td>{{ index }}</td>
+                              <td>{{ ds.loan_id }}</td>
+                              <td>{{ ds.loan_payment_id }}</td>
+                              <td>{{ ds.loan_payment_date }}</td>
+                              <td>{{ ds.money }}</td>        
+                            </tr>
+                          </tbody>
+                        </template>
+                      </v-simple-table>
                     </v-card>
                   </v-tab-item>
                 </v-tabs-items>
@@ -148,13 +255,20 @@ export default {
 
   data: () => ({
     menus: [false, false, false],
-
+    receiveData: "",
     tabOut: 0,
     tabIn: 0,
-    operationsOut: ["Loan", "Loan Payment"],
+    formCheck_0: null,
+    formCheck_1: null,
+    operationsOut: ["Loan", "Loan Owner", "Loan Payment"],
     operationsIn: ["Create", "Delete", "Search"],
     cardTitle: [
       ["需要创建的贷款的信息", "需要删除的贷款的信息", "需要搜索的贷款信息"],
+      [
+        "需要创建的贷款所有人的信息",
+        "需要删除的贷款所有人的信息",
+        "需要搜索的贷款所有人信息"
+      ],
       [
         "需要创建的贷款支付的信息",
         "需要删除的贷款支付的信息",
@@ -163,19 +277,23 @@ export default {
     ],
     cardStatusTitle: [
       ["创建贷款状态", "删除贷款状态", "搜索贷款状态"],
+      ["创建贷款所有人状态", "删除贷款所有人状态", "搜索贷款所有人状态"],
       ["创建贷款支付状态", "删除贷款支付状态", "搜索贷款支付状态"]
     ],
     inputDataLoan: {
       id: "",
       bankName: "",
-      money: "",
-      customerID: ""
+      money: ""
     },
     inputDataLoanPayment: {
       loanID: "",
       loanPaymentID: "",
       date: "",
       money: ""
+    },
+    inputDataOwner: {
+      loanID: "",
+      customerID: ""
     }
   }),
   computed: {
@@ -193,10 +311,24 @@ export default {
       }
       return result;
     },
+    formLOEmpty: function() {
+      let result = this.inputDataOwner["loanID"].length == 0;
+      for (let item in this.inputDataOwner) {
+        result = result && this.inputDataOwner[item].length == 0;
+      }
+      return result;
+    },
     checkLCreate: function() {
       let result = true;
       for (let item in this.inputDataLoan) {
         result = result && this.inputDataLoan[item].length != 0;
+      }
+      return result;
+    },
+    checkLOreate: function() {
+      let result = true;
+      for (let item in this.inputDataOwner) {
+        result = result && this.inputDataOwner[item].length != 0;
       }
       return result;
     },
@@ -211,6 +343,8 @@ export default {
       let result = false;
       if (this.tabOut == 0) {
         result = !this.formLEmpty;
+      } else if (this.tabOut == 1) {
+        result = !this.formLOEmpty;
       } else {
         result = !this.formLPEmpty;
       }
@@ -224,14 +358,42 @@ export default {
         } else {
           result = !this.formLEmpty;
         }
+        result = result && this.formCheck_0;
+      } else if (this.tabOut == 1) {
+        if (this.tabIn == 0) {
+          result = this.checkLOreate;
+        } else {
+          result = !this.formLOEmpty;
+        }
       } else {
         if (this.tabIn == 0) {
           result = this.checkLPCreate;
         } else {
           result = !this.formLPEmpty;
         }
+        result = result && this.formCheck_1;
       }
       return result;
+    },
+    postData: function() {
+      return {
+        tab_out: this.tabOut.toString(),
+        tab_in: this.tabIn.toString(),
+        loan_id:
+          this.tabOut == 0
+            ? this.inputDataLoan.id
+            : this.tabOut == 1
+            ? this.inputDataOwner.loanID
+            : this.inputDataLoanPayment.loanID,
+        loan_payment_id: this.inputDataLoanPayment.loanPaymentID,
+        bank_name: this.inputDataLoan.bankName,
+        money:
+          this.tabOut == 0
+            ? this.inputDataLoan.money
+            : this.inputDataLoanPayment.money,
+        customer_id: this.inputDataOwner.customerID,
+        loan_payment_date: this.inputDataLoanPayment.date
+      };
     }
   },
   methods: {
@@ -240,6 +402,10 @@ export default {
         for (let item in this.inputDataLoan) {
           this.inputDataLoan[item] = "";
         }
+      } else if (this.tabOut == 1) {
+        for (let item in this.inputDataOwner) {
+          this.inputDataOwner[item] = "";
+        }
       } else {
         for (let item in this.inputDataLoanPayment) {
           this.inputDataLoanPayment[item] = "";
@@ -247,7 +413,14 @@ export default {
       }
     },
     commitForm: function() {
-      alert(1);
+      this.$axios
+        .post("/loan-management", this.postData)
+        .then(response => {
+          this.receiveData = response.data;
+        })
+        .catch(function(error) {
+          alert(error);
+        });
     }
   }
 };

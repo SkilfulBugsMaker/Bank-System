@@ -2,7 +2,7 @@ from flask_restful import Api, Resource
 from .models import *
 from flask_restful import reqparse
 import datetime
-import json
+import math
 
 # api instance
 api = Api(app)
@@ -794,12 +794,272 @@ class AccountManagement(Resource):
 
 
 class LoanManagement(Resource):
+    parser = reqparse.RequestParser()
+    parser.add_argument(
+        'tab_out', type=str, required=True, choices=['0', '1', '2'],
+        help="tab_out must in ['0', '1', '2']"
+    )
+    parser.add_argument(
+        'tab_in', type=str, required=True, choices=['0', '1', '2', '3'],
+        help="tab_in must in ['0', '1', '2', '3']"
+    )
+    parser.add_argument(
+        'loan_id', type=str, required=False
+    )
+    parser.add_argument(
+        'loan_payment_id', type=str, required=False
+    )
+    parser.add_argument(
+        'bank_name', type=str, required=False
+    )
+    parser.add_argument(
+        'money', type=str, required=False
+    )
+    parser.add_argument(
+        'customer_id', type=str, required=False
+    )
+    parser.add_argument(
+        'loan_payment_date', type=str, required=False
+    )
 
-    pass
+    def post(self):
+        args = self.parser.parse_args()
+        convert_dict_loan = {
+            'loan_id': 'l_code',
+            'bank_name': 'l_sb_name',
+            'money': 'l_money'
+        }
+        convert_dict_loan_payment = {
+            'loan_id': 'lp_l_code',
+            'loan_payment_id': 'lp_code',
+            'loan_payment_date': 'lp_date',
+            'money': 'lp_money'
+        }
+        convert_dict_loan_customer = {
+            'customer_id': 'lc_c_identity_code',
+            'loan_id': 'lc_l_code'
+        }
+        result = {
+            'status': True,
+            'tab_out': args['tab_out'],
+            'tab_in': args['tab_in'],
+            'message': '',
+            'data': [],
+        }
+        if args['tab_out'] == '0':
+            if args['tab_in'] == '0':
+                # insert loan
+                if result['status']:
+                    # check if loan already exist
+                    loan = Loan.query.filter_by(
+                        l_code=args['loan_id']
+                    ).first()
+                    if loan is not None:
+                        result['status'] = False
+                        result['message'] = 'Loan already exists!'
+                if result['status']:
+                    # check if bank already exist
+                    bank = SubBank.query.filter_by(
+                        sb_name=args['bank_name']
+                    ).first()
+                    if bank is None:
+                        result['status'] = False
+                        result['message'] = 'Bank does not exist!'
+
+                if result['status']:
+                    info = {convert_dict_loan[k]: args[k] for k in convert_dict_loan}
+                    db.session.add(Loan(**info))
+                    db.session.commit()
+                    result['message'] = 'Insert Loan successfully!'
+            elif args['tab_in'] == '1':
+                query = {convert_dict_loan[k]: args[k] for k in convert_dict_loan if args[k] != ''}
+                loans = Loan.query.filter_by(**query).all()
+                if len(loans) == 0:
+                    result['status'] = False
+                    result['message'] = "Not find any loans to delete!"
+                if result['status']:
+                    flag = True
+                    for l in loans:
+                        l_money = l.l_money
+                        loan_payments = LoanPayment.query.filter_by(
+                            lp_l_code=l.l_code
+                        ).all()
+                        lp_money = 0
+                        for lp in loan_payments:
+                            lp_money += lp.lp_money
+                        if not math.isclose(l_money, lp_money):
+                            flag = False
+                    if not flag:
+                        result['status'] = False
+                        result['message'] = "Some Loan are not finish payment!"
+                if result['status']:
+                    num = len(loans)
+                    for l in loans:
+                        loan_payments = LoanPayment.query.filter_by(
+                            lp_l_code=l.l_code
+                        ).all()
+                        for lp in loan_payments:
+                            db.session.delete(lp)
+                        loan_customers = LoanCustomer.query.filter_by(
+                            lc_l_code=l.l_code
+                        ).all()
+                        for lc in loan_customers:
+                            db.session.delete(lc)
+                        db.session.delete(l)
+                        db.session.commit()
+                    result['message'] = "Delete %d loans successfully!" % num
+            else:
+                query = {convert_dict_loan[k]: args[k] for k in convert_dict_loan if args[k] != ''}
+                loans = Loan.query.filter_by(**query).all()
+                if len(loans) == 0:
+                    result['status'] = False
+                    result['message'] = "Not find any results!"
+                if result['status']:
+                    for l in loans:
+                        l_money = l.l_money
+                        loan_payments = LoanPayment.query.filter_by(
+                            lp_l_code=l.l_code
+                        ).all()
+                        lp_money = 0
+                        for lp in loan_payments:
+                            lp_money += lp.lp_money
+                        if lp_money == 0:
+                            loan_status = 'Loan distribution not started'
+                        elif math.isclose(l_money, lp_money):
+                            loan_status = 'Loan distribution already finished'
+                        else:
+                            loan_status = 'Loan distribution in progress'
+
+                        result['data'].append({
+                            'loan_id': l.l_code,
+                            'money': l.l_money,
+                            'bank_name': l.l_sb_name,
+                            'loan_status': loan_status
+                        })
+                    result['message'] = 'Find %d results!' % len(loans)
+        elif args['tab_out'] == '1':
+            if args['tab_in'] == '0':
+                # insert loan customer
+                if result['status']:
+                    loan = Loan.query.filter_by(
+                        l_code=args['loan_id']
+                    ).first()
+                    if loan is None:
+                        result['status'] = False
+                        result['message'] = 'Loan does not exists!'
+                if result['status']:
+                    customer = Customer.query.filter_by(
+                        c_identity_code=args['customer_id']
+                    ).first()
+                    if customer is None:
+                        result['status'] = False
+                        result['message'] = 'Customer does not exists!'
+                if result['status']:
+                    info = {convert_dict_loan_customer[k]: args[k] for k in convert_dict_loan_customer}
+                    db.session.add(LoanCustomer(**info))
+                    db.session.commit()
+                    result['message'] = 'Insert successfully!'
+
+            elif args['tab_in'] == '1':
+                query = {convert_dict_loan_customer[k]: args[k] for k in convert_dict_loan_customer if args[k] != ''}
+                records = LoanCustomer.query.filter_by(**query).all()
+                if len(records) == 0:
+                    result['status'] = False
+                    result['message'] = "Can not find result to delete"
+                if result['status']:
+                    num = len(records)
+                    for r in records:
+                        db.session.delete(r)
+                    db.session.commit()
+                    result['message'] = 'Delete %d records successfully!' % num
+            else:
+                query = {convert_dict_loan_customer[k]: args[k] for k in convert_dict_loan_customer if args[k] != ''}
+                records = LoanCustomer.query.filter_by(**query).all()
+                if len(records) == 0:
+                    result['status'] = False
+                    result['message'] = "Can not find result!"
+                if result['status']:
+                    for r in records:
+                        result['data'].append({
+                            'loan_id': r.lc_l_code,
+                            'customer_id': r.lc_c_identity_code
+                        })
+                    result['message'] = "Find %d records!" % len(records)
+        else:
+            if args['tab_in'] == '0':
+                if result['status']:
+                    loan = Loan.query.filter_by(
+                        l_code=args['loan_id']
+                    ).first()
+                    if loan is None:
+                        result['status'] = False
+                        result['message'] = 'Loan does not exist!'
+                if result['status']:
+                    loan_payment = LoanPayment.query.filter_by(
+                        lp_code=args['loan_payment_id'],
+                        lp_l_code=args['loan_id']
+                    ).first()
+                    if loan_payment is not None:
+                        result['status'] = False
+                        result['message'] = 'Loan payment id already exists!'
+                max_money = 0
+                if result['status']:
+                    loan = Loan.query.filter_by(
+                        l_code=args['loan_id']
+                    ).first()
+                    l_money = loan.l_money
+                    loan_payments = LoanPayment.query.filter_by(
+                        lp_l_code=args['loan_id']
+                    ).all()
+                    lp_money = 0
+                    for lp in loan_payments:
+                        lp_money += lp.lp_money
+                    if math.isclose(l_money, lp_money):
+                        result['status'] = False
+                        result['message'] = 'Loan already finished distribution!'
+                    else:
+                        max_money = l_money - lp_money
+                if result['status']:
+                    if float(args['money']) > max_money:
+                        args['money'] = str(max_money)
+                    info = {convert_dict_loan_payment[k]: args[k] for k in convert_dict_loan_payment}
+                    db.session.add(LoanPayment(**info))
+                    db.session.commit()
+                    result['message'] = 'Insert successfully!'
+
+            elif args['tab_in'] == '1':
+                query = {convert_dict_loan_payment[k]: args[k] for k in convert_dict_loan_payment if args[k] != ''}
+                loan_payments = LoanPayment.query.filter_by(**query).all()
+                if len(loan_payments) == 0:
+                    result['status'] = False
+                    result['message'] = "Can not find any results to delete!"
+                if result['status']:
+                    num = len(loan_payments)
+                    for lp in loan_payments:
+                        db.session.delete(lp)
+                    db.session.commit()
+                    result['message'] = 'Delete %d record successfully!' % num
+            else:
+                query = {convert_dict_loan_payment[k]: args[k] for k in convert_dict_loan_payment if args[k] != ''}
+                loan_payments = LoanPayment.query.filter_by(**query).all()
+                if len(loan_payments) == 0:
+                    result['status'] = False
+                    result['message'] = "Can not find any results!"
+                if result['status']:
+                    for lp in loan_payments:
+                        result['data'].append({
+                            'loan_id': lp.lp_l_code,
+                            'loan_payment_id': lp.lp_code,
+                            'loan_payment_date': str(lp.lp_date),
+                            'money': lp.lp_money
+                        })
+                    result['message'] = "Find %d results!" % len(loan_payments)
+
+        return result
 
 
 api.add_resource(BusinessStatistic, '/api/business-statistic')
 api.add_resource(CustomerManagement, '/api/customer-management')
 api.add_resource(AccountManagement, '/api/account-management')
-api.add_resource((LoanManagement, '/api/loan-management'))
+api.add_resource(LoanManagement, '/api/loan-management')
 
