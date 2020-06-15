@@ -4,287 +4,458 @@
     <v-row>
       <v-col>
         <v-card flat>
-          <v-tabs fixed-tabs v-model="tab">
-            <v-tab v-for="(op, idx) in operations" :key="idx">{{ op }}</v-tab>
+          <v-tabs fixed-tabs v-model="tabOut">
+            <v-tab v-for="(opOut, idxOut) in operationsOut" :key="idxOut">{{ opOut }}</v-tab>
           </v-tabs>
-          <v-tabs-items v-model="tab">
-            <v-tab-item v-for="(op, idx) in operations" :key="idx">
-              <v-card outlined class="my-4 px-4">
-                <v-card-title>{{ cardOneTitle[idx] }}</v-card-title>
-                <v-form>
-                  <v-row>
-                    <v-col cols="2">
-                      <v-text-field
-                        v-model="inputData.id"
-                        counter="256"
-                        label="Account ID"
-                        outlined
-                        dense
-                      ></v-text-field>
-                    </v-col>
-                    <v-col cols="2">
-                      <v-text-field
-                        v-model="inputData.balance"
-                        counter="256"
-                        label="Account balance"
-                        outlined
-                        dense
-                      ></v-text-field>
-                    </v-col>
-                    <v-col cols="3">
-                      <v-text-field
-                        v-model="inputData.openBank"
-                        counter="256"
-                        label="Account Open bank"
-                        outlined
-                        dense
-                      ></v-text-field>
-                    </v-col>
-                    <v-col cols="3">
-                      <v-menu
-                        v-model="tabMenu[idx].menu1"
-                        :close-on-content-click="false"
-                        transition="scale-transition"
-                        offset-y
-                      >
-                        <template v-slot:activator="{ on, attrs }">
-                          <v-text-field
-                            v-model="inputData.openDate"
-                            label="Account Open Date"
-                            outlined
-                            dense
-                            readonly
-                            v-bind="attrs"
-                            v-on="on"
-                          ></v-text-field>
-                        </template>
-                        <v-date-picker
-                          v-model="inputData.openDate"
-                          no-title
-                          @input="tabMenu[idx].menu1 = false"
-                        ></v-date-picker>
-                      </v-menu>
-                    </v-col>
-                    <v-col cols="2">
-                      <v-select
-                        label="Account Type"
-                        v-model="inputData.type"
-                        :items="['Checking', 'Savings']"
-                        outlined
-                        dense
-                      ></v-select>
-                    </v-col>
-                  </v-row>
-                  <v-row>
-                    <v-col cols="3">
-                      <v-menu
-                        v-model="tabMenu2[idx].menu1"
-                        :close-on-content-click="false"
-                        transition="scale-transition"
-                        offset-y
-                      >
-                        <template v-slot:activator="{ on, attrs }">
-                          <v-text-field
-                            v-model="inputData.lastVisitDate"
-                            label="Account Last Visit Date"
-                            outlined
-                            dense
-                            readonly
-                            v-bind="attrs"
-                            v-on="on"
-                          ></v-text-field>
-                        </template>
-                        <v-date-picker
-                          v-model="inputData.lastVisitDate"
-                          no-title
-                          @input="tabMenu2[idx].menu1 = false"
-                        ></v-date-picker>
-                      </v-menu>
-                    </v-col>
-                    <v-col cols="2">
-                      <v-text-field
-                        v-model="inputData.customerID"
-                        counter="256"
-                        label="Customer ID"
-                        outlined
-                        dense
-                      ></v-text-field>
-                    </v-col>
-                    <v-col cols="2" v-if="inputData.type == 'Checking'">
-                      <v-text-field
-                        v-model="inputData.checkingAccountCredit"
-                        counter="256"
-                        label="Credit"
-                        outlined
-                        dense
-                      ></v-text-field>
-                    </v-col>
-                    <v-col cols="2" v-if="inputData.type == 'Savings'">
-                      <v-text-field
-                        v-model="inputData.savingsAccountRate"
-                        counter="256"
-                        label="Rate"
-                        outlined
-                        dense
-                      ></v-text-field>
-                    </v-col>
-                    <v-col cols="2" v-if="inputData.type == 'Savings'">
-                      <v-text-field
-                        v-model="inputData.savingsAccountCurrencyType"
-                        counter="256"
-                        label="Currency Type"
-                        outlined
-                        dense
-                      ></v-text-field>
-                    </v-col>
-                  </v-row>
-                </v-form>
-              </v-card>
-              <v-card outlined class="my-4 px-4" v-if="idx == 2">
-                <v-card-title>更新后的账户信息</v-card-title>
-                <v-form>
-                  <v-row>
-                    <v-col cols="2">
-                      <v-text-field
-                        v-model="modifyData.id"
-                        counter="256"
-                        label="Account ID"
-                        outlined
-                        dense
-                      ></v-text-field>
-                    </v-col>
-                    <v-col cols="2">
-                      <v-text-field
-                        v-model="modifyData.balance"
-                        counter="256"
-                        label="Account balance"
-                        outlined
-                        dense
-                      ></v-text-field>
-                    </v-col>
-                    <v-col cols="3">
-                      <v-text-field
-                        v-model="modifyData.openBank"
-                        counter="256"
-                        label="Account Open bank"
-                        outlined
-                        dense
-                      ></v-text-field>
-                    </v-col>
-                    <v-col cols="3">
-                      <v-menu
-                        v-model="tabMenu[idx].menu2"
-                        :close-on-content-click="false"
-                        transition="scale-transition"
-                        offset-y
-                      >
-                        <template v-slot:activator="{ on, attrs }">
-                          <v-text-field
-                            v-model="modifyData.openDate"
-                            label="Account Open Date"
-                            readonly
-                            outlined
-                            dense
-                            v-bind="attrs"
-                            v-on="on"
-                          ></v-text-field>
-                        </template>
-                        <v-date-picker
-                          v-model="modifyData.openDate"
-                          no-title
-                          @input="tabMenu[idx].menu2 = false"
-                        ></v-date-picker>
-                      </v-menu>
-                    </v-col>
-                    <v-col cols="2">
-                      <v-select
-                        label="Account Type"
-                        v-model="modifyData.type"
-                        :items="['Checking', 'Savings']"
-                        outlined
-                        dense
-                      ></v-select>
-                    </v-col>
-                  </v-row>
-                  <v-row>
-                    <v-col cols="3">
-                      <v-menu
-                        v-model="tabMenu2[idx].menu2"
-                        :close-on-content-click="false"
-                        transition="scale-transition"
-                        offset-y
-                      >
-                        <template v-slot:activator="{ on, attrs }">
-                          <v-text-field
-                            v-model="modifyData.lastVisitDate"
-                            label="Account Last Visit Date"
-                            outlined
-                            dense
-                            readonly
-                            v-bind="attrs"
-                            v-on="on"
-                          ></v-text-field>
-                        </template>
-                        <v-date-picker
-                          v-model="modifyData.lastVisitDate"
-                          no-title
-                          @input="tabMenu2[idx].menu2 = false"
-                        ></v-date-picker>
-                      </v-menu>
-                    </v-col>
-                    <v-col cols="2">
-                      <v-text-field
-                        v-model="modifyData.customerID"
-                        counter="256"
-                        label="Customer ID"
-                        outlined
-                        dense
-                      ></v-text-field>
-                    </v-col>
-                    <v-col cols="2" v-if="modifyData.type == 'Checking'">
-                      <v-text-field
-                        v-model="modifyData.checkingAccountCredit"
-                        counter="256"
-                        label="Credit"
-                        outlined
-                        dense
-                      ></v-text-field>
-                    </v-col>
-                    <v-col cols="2" v-if="modifyData.type == 'Savings'">
-                      <v-text-field
-                        v-model="modifyData.savingsAccountRate"
-                        counter="256"
-                        label="Rate"
-                        outlined
-                        dense
-                      ></v-text-field>
-                    </v-col>
-                    <v-col cols="2" v-if="modifyData.type == 'Savings'">
-                      <v-text-field
-                        v-model="modifyData.savingsAccountCurrencyType"
-                        counter="256"
-                        label="Currency Type"
-                        outlined
-                        dense
-                      ></v-text-field>
-                    </v-col>
-                  </v-row>
-                </v-form>
-              </v-card>
-              <v-card flat class="my-4 px-4">
-                <v-row>
-                  <v-col cols="2" offset="4">
-                    <v-btn :disabled="!commitBtnValid" color="success" @click="commitForm">Commit</v-btn>
-                  </v-col>
-                  <v-col cols="2">
-                    <v-btn :disabled="!resetBtnValid" color="warning" @click="resetForm">Reset</v-btn>
-                  </v-col>
-                </v-row>
-              </v-card>
-              <v-divider class="py-2"></v-divider>
+          <v-tabs-items v-model="tabOut">
+            <v-tab-item v-for="(opOut, idxOut) in operationsOut" :key="idxOut">
+              <v-card flat>
+                <v-tabs fixed-tabs v-model="tabIn">
+                  <v-tab v-for="(opIn, idxIn) in operationsIn" :key="idxIn">{{ opIn }}</v-tab>
+                </v-tabs>
+                <v-tabs-items v-model="tabIn">
+                  <v-tab-item v-for="(opIn, idxIn) in operationsIn" :key="idxIn">
+                    <v-card outlined class="my-4 px-4" v-if="idxOut==0">
+                      <v-card-title>{{ cardOneTitle[idxOut][idxIn] }}</v-card-title>
+                      <v-form v-model="formCheck_0">
+                        <v-row>
+                          <v-col cols="2">
+                            <v-text-field
+                              v-model="inputDataAccount.id"
+                              counter="256"
+                              label="Account ID"
+                              outlined
+                              dense
+                            ></v-text-field>
+                          </v-col>
+                          <v-col cols="2">
+                            <v-text-field
+                              v-model="inputDataAccount.balance"
+                              counter="256"
+                              label="Account balance"
+                              outlined
+                              dense
+                              :rules="[v => (v == '' || /^[+]{0,1}(\d+)$|^[+]{0,1}(\d+\.\d+)$/.test(v) || 'Invalid input!')]"
+                            ></v-text-field>
+                          </v-col>
+                          <v-col cols="3">
+                            <v-text-field
+                              v-model="inputDataAccount.openBank"
+                              counter="256"
+                              label="Account Open bank"
+                              outlined
+                              dense
+                            ></v-text-field>
+                          </v-col>
+                          <v-col cols="3">
+                            <v-menu
+                              v-model="tabMenu[idxIn].menu1"
+                              :close-on-content-click="false"
+                              transition="scale-transition"
+                              offset-y
+                            >
+                              <template v-slot:activator="{ on, attrs }">
+                                <v-text-field
+                                  v-model="inputDataAccount.openDate"
+                                  label="Account Open Date"
+                                  outlined
+                                  dense
+                                  readonly
+                                  v-bind="attrs"
+                                  v-on="on"
+                                ></v-text-field>
+                              </template>
+                              <v-date-picker
+                                v-model="inputDataAccount.openDate"
+                                no-title
+                                @input="tabMenu[idxIn].menu1 = false"
+                              ></v-date-picker>
+                            </v-menu>
+                          </v-col>
+                          <v-col cols="2">
+                            <v-select
+                              label="Account Type"
+                              v-model="inputDataAccount.type"
+                              :items="['Checking', 'Savings']"
+                              outlined
+                              dense
+                            ></v-select>
+                          </v-col>
+                        </v-row>
+                        <v-row>
+                          <v-col cols="2" v-if="inputDataAccount.type == 'Checking'">
+                            <v-text-field
+                              v-model="inputDataAccount.checkingAccountCredit"
+                              counter="256"
+                              label="Credit"
+                              outlined
+                              dense
+                              :rules="[v => (v == '' || /^[+]{0,1}(\d+)$|^[+]{0,1}(\d+\.\d+)$/.test(v) || 'Invalid input!')]"
+                            ></v-text-field>
+                          </v-col>
+                          <v-col cols="2" v-if="inputDataAccount.type == 'Savings'">
+                            <v-text-field
+                              v-model="inputDataAccount.savingsAccountRate"
+                              counter="256"
+                              label="Rate"
+                              outlined
+                              dense
+                              :rules="[v => (v == '' || /^[+]{0,1}(\d+)$|^[+]{0,1}(\d+\.\d+)$/.test(v) || 'Invalid input!')]"
+                            ></v-text-field>
+                          </v-col>
+                          <v-col cols="2" v-if="inputDataAccount.type == 'Savings'">
+                            <v-text-field
+                              v-model="inputDataAccount.savingsAccountCurrencyType"
+                              counter="256"
+                              label="Currency Type"
+                              outlined
+                              dense
+                            ></v-text-field>
+                          </v-col>
+                        </v-row>
+                      </v-form>
+                    </v-card>
+                    <v-card outlined class="my-4 px-4" v-if="idxOut==0 && idxIn==2">
+                      <v-card-title>更新后的账户信息</v-card-title>
+                      <v-form v-model="formCheck_1">
+                        <v-row>
+                          <v-col cols="2">
+                            <v-text-field
+                              v-model="modifyDataAccount.id"
+                              counter="256"
+                              label="Account ID"
+                              outlined
+                              disabled
+                              dense
+                            ></v-text-field>
+                          </v-col>
+                          <v-col cols="2">
+                            <v-text-field
+                              v-model="modifyDataAccount.balance"
+                              counter="256"
+                              label="Account balance"
+                              outlined
+                              dense
+                              :rules="[v => (v == '' || /^[+]{0,1}(\d+)$|^[+]{0,1}(\d+\.\d+)$/.test(v) || 'Invalid input!')]"
+                            ></v-text-field>
+                          </v-col>
+                          <v-col cols="3">
+                            <v-text-field
+                              v-model="modifyDataAccount.openBank"
+                              counter="256"
+                              label="Account Open bank"
+                              outlined
+                              disabled
+                              dense
+                            ></v-text-field>
+                          </v-col>
+                          <v-col cols="3">
+                            <v-menu
+                              v-model="tabMenu[idxIn].menu2"
+                              :close-on-content-click="false"
+                              transition="scale-transition"
+                              offset-y
+                            >
+                              <template v-slot:activator="{ on, attrs }">
+                                <v-text-field
+                                  v-model="modifyDataAccount.openDate"
+                                  label="Account Open Date"
+                                  outlined
+                                  dense
+                                  readonly
+                                  v-bind="attrs"
+                                  v-on="on"
+                                  disabled
+                                ></v-text-field>
+                              </template>
+                              <v-date-picker
+                                v-model="modifyDataAccount.openDate"
+                                no-title
+                                disabled
+                                @input="tabMenu[idxIn].menu2 = false"
+                              ></v-date-picker>
+                            </v-menu>
+                          </v-col>
+                          <v-col cols="2">
+                            <v-select
+                              label="Account Type"
+                              v-model="modifyDataAccount.type"
+                              :items="['Checking', 'Savings']"
+                              outlined
+                              disabled
+                              dense
+                            ></v-select>
+                          </v-col>
+                        </v-row>
+                        <v-row>
+                          <v-col cols="2" v-if="inputDataAccount.type == 'Checking'">
+                            <v-text-field
+                              v-model="modifyDataAccount.checkingAccountCredit"
+                              counter="256"
+                              label="Credit"
+                              outlined
+                              dense
+                              :rules="[v => (v == '' || /^[+]{0,1}(\d+)$|^[+]{0,1}(\d+\.\d+)$/.test(v) || 'Invalid input!')]"
+                            ></v-text-field>
+                          </v-col>
+                          <v-col cols="2" v-if="inputDataAccount.type == 'Savings'">
+                            <v-text-field
+                              v-model="modifyDataAccount.savingsAccountRate"
+                              counter="256"
+                              label="Rate"
+                              outlined
+                              dense
+                              :rules="[v => (v == '' || /^[+]{0,1}(\d+)$|^[+]{0,1}(\d+\.\d+)$/.test(v) || 'Invalid input!')]"
+                            ></v-text-field>
+                          </v-col>
+                          <v-col cols="2" v-if="inputDataAccount.type == 'Savings'">
+                            <v-text-field
+                              v-model="modifyDataAccount.savingsAccountCurrencyType"
+                              counter="256"
+                              label="Currency Type"
+                              outlined
+                              dense
+                            ></v-text-field>
+                          </v-col>
+                        </v-row>
+                      </v-form>
+                    </v-card>
+                    <v-card outlined class="my-4 px-4" v-if="idxOut==1">
+                      <v-card-title>{{ cardOneTitle[idxOut][idxIn] }}</v-card-title>
+                      <v-form v-model="formCheck_2">
+                        <v-row>
+                          <v-col cols="2">
+                            <v-text-field
+                              v-model="inputDataOwner.id"
+                              counter="256"
+                              label="Account ID"
+                              outlined
+                              dense
+                            ></v-text-field>
+                          </v-col>
+                          <v-col cols="2">
+                            <v-text-field
+                              v-model="inputDataOwner.customerID"
+                              counter="256"
+                              label="Customer ID"
+                              outlined
+                              dense
+                            ></v-text-field>
+                          </v-col>
+                          <v-col cols="3">
+                            <v-text-field
+                              v-model="inputDataOwner.openBank"
+                              counter="256"
+                              label="Bank Name"
+                              outlined
+                              dense
+                            ></v-text-field>
+                          </v-col>
+                          <v-col cols="3">
+                            <v-menu
+                              v-model="tabMenu2[idxIn].menu1"
+                              :close-on-content-click="false"
+                              transition="scale-transition"
+                              offset-y
+                            >
+                              <template v-slot:activator="{ on, attrs }">
+                                <v-text-field
+                                  v-model="inputDataOwner.lastVisitDate"
+                                  label="Last Visit Date"
+                                  outlined
+                                  dense
+                                  readonly
+                                  v-bind="attrs"
+                                  v-on="on"
+                                ></v-text-field>
+                              </template>
+                              <v-date-picker
+                                v-model="inputDataOwner.lastVisitDate"
+                                no-title
+                                @input="tabMenu2[idxIn].menu1 = false"
+                              ></v-date-picker>
+                            </v-menu>
+                          </v-col>
+                          <v-col cols="2">
+                            <v-select
+                              label="Account Type"
+                              v-model="inputDataOwner.type"
+                              :items="['Checking', 'Savings']"
+                              outlined
+                              dense
+                            ></v-select>
+                          </v-col>
+                        </v-row>
+                      </v-form>
+                    </v-card>
+                    <v-card outlined class="my-4 px-4" v-if="idxOut==1 && idxIn==2">
+                      <v-card-title>{{ cardOneTitle[idxOut][idxIn] }}</v-card-title>
+                      <v-form v-model="formCheck_3">
+                        <v-row>
+                          <v-col cols="2">
+                            <v-text-field
+                              v-model="modifyDataOwner.id"
+                              counter="256"
+                              label="Account ID"
+                              outlined
+                              disabled
+                              dense
+                            ></v-text-field>
+                          </v-col>
+                          <v-col cols="2">
+                            <v-text-field
+                              v-model="modifyDataOwner.customerID"
+                              counter="256"
+                              label="Customer ID"
+                              outlined
+                              disabled
+                              dense
+                            ></v-text-field>
+                          </v-col>
+                          <v-col cols="3">
+                            <v-text-field
+                              v-model="modifyDataOwner.openBank"
+                              counter="256"
+                              label="Bank Name"
+                              outlined
+                              disabled
+                              dense
+                            ></v-text-field>
+                          </v-col>
+                          <v-col cols="3">
+                            <v-menu
+                              v-model="tabMenu2[idxIn].menu2"
+                              :close-on-content-click="false"
+                              transition="scale-transition"
+                              offset-y
+                            >
+                              <template v-slot:activator="{ on, attrs }">
+                                <v-text-field
+                                  v-model="modifyDataOwner.lastVisitDate"
+                                  label="Last Visit Date"
+                                  outlined
+                                  dense
+                                  readonly
+                                  v-bind="attrs"
+                                  v-on="on"
+                                ></v-text-field>
+                              </template>
+                              <v-date-picker
+                                v-model="modifyDataOwner.lastVisitDate"
+                                no-title
+                                @input="tabMenu2[idxIn].menu2 = false"
+                              ></v-date-picker>
+                            </v-menu>
+                          </v-col>
+                          <v-col cols="2">
+                            <v-select
+                              label="Account Type"
+                              v-model="modifyDataOwner.type"
+                              :items="['Checking', 'Savings']"
+                              outlined
+                              disabled
+                              dense
+                            ></v-select>
+                          </v-col>
+                        </v-row>
+                      </v-form>
+                    </v-card>
+                    <v-card flat class="my-4 px-4">
+                      <v-row>
+                        <v-col cols="2" offset="4">
+                          <v-btn
+                            :disabled="!commitBtnValid"
+                            color="success"
+                            @click="commitForm"
+                          >Commit</v-btn>
+                        </v-col>
+                        <v-col cols="2">
+                          <v-btn :disabled="!resetBtnValid" color="warning" @click="resetForm">Reset</v-btn>
+                        </v-col>
+                      </v-row>
+                    </v-card>
+                    <v-divider class="py-2"></v-divider>
 
-              <v-card outlined>
-                <v-card-title>{{ cardStatusTitle[idx] }}</v-card-title>
+                    <v-card
+                      flat
+                      v-if="idxIn!=3 && receiveData != '' && receiveData.tab_in==idxIn && receiveData.tab_out==idxOut"
+                    >
+                      <v-card-title>{{ cardStatusTitle[idxOut][idxIn] }}</v-card-title>
+                      <v-card-text>{{ receiveData.message }}</v-card-text>
+                    </v-card>
+
+                    <v-card
+                      flat
+                      v-if="idxOut==0 && idxIn==3 && receiveData != '' && receiveData.tab_in==idxIn && receiveData.tab_out==idxOut"
+                    >
+                      <v-card-title>{{ cardStatusTitle[idxOut][idxIn] }}</v-card-title>
+                      <v-card-text>{{ receiveData.message }}</v-card-text>
+
+                      <v-simple-table>
+                        <template v-slot:default>
+                          <thead>
+                            <tr>
+                              <th class="text-left">Index</th>
+                              <th class="text-left">Account ID</th>
+                              <th class="text-left">Account Type</th>
+                              <th class="text-left">Account Balance</th>
+                              <th class="text-left">Account Open Bank</th>
+                              <th class="text-left">Account Open Date</th>
+                              <th class="text-left">Account Credit</th>
+                              <th class="text-left">Account Currency Type</th>
+                              <th class="text-left">Account Rate</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr v-for="(ds, index) in receiveData.data" :key="index">
+                              <td>{{ index }}</td>
+                              <td>{{ ds.account_id }}</td>
+                              <td>{{ ds.account_type }}</td>
+                              <td>{{ ds.account_balance }}</td>
+                              <td>{{ ds.account_open_bank }}</td>
+                              <td>{{ ds.account_open_date }}</td>
+                              <td>{{ ds.account_credit }}</td>
+                              <td>{{ ds.account_currency_type }}</td>
+                              <td>{{ ds.account_rate }}</td>
+                            </tr>
+                          </tbody>
+                        </template>
+                      </v-simple-table>
+                    </v-card>
+                    <v-card
+                      flat
+                      v-if="idxOut==1 && idxIn==3 && receiveData != '' && receiveData.tab_in==idxIn && receiveData.tab_out==idxOut"
+                    >
+                      <v-card-title>{{ cardStatusTitle[idxOut][idxIn] }}</v-card-title>
+                      <v-card-text>{{ receiveData.message }}</v-card-text>
+
+                      <v-simple-table>
+                        <template v-slot:default>
+                          <thead>
+                            <tr>
+                              <th class="text-left">Index</th>
+                              <th class="text-left">Account ID</th>
+                              <th class="text-left">Account Type</th>
+                              <th class="text-left">Customer ID</th>
+                              <th class="text-left">Account Open Bank</th>
+                              <th class="text-left">Account Last Visit Date</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr v-for="(ds, index) in receiveData.data" :key="index">
+                              <td>{{ index }}</td>
+                              <td>{{ ds.account_id }}</td>
+                              <td>{{ ds.account_type }}</td>
+                              <td>{{ ds.customer_id }}</td>
+                              <td>{{ ds.account_open_bank }}</td>
+                              <td>{{ ds.account_last_visit_date }}</td>
+                            </tr>
+                          </tbody>
+                        </template>
+                      </v-simple-table>
+                    </v-card>
+                  </v-tab-item>
+                </v-tabs-items>
               </v-card>
             </v-tab-item>
           </v-tabs-items>
@@ -335,117 +506,280 @@ export default {
         menu2: false
       }
     ],
-    tab: 0,
-    operations: ["Create", "Delete", "Modify", "Search"],
+    tabOut: 0,
+    tabIn: 0,
+    formCheck_0: null,
+    formCheck_1: null,
+    formCheck_2: null,
+    formCheck_3: null,
+    operationsOut: ["Account Management", "Owner Management"],
+    operationsIn: ["Create", "Delete", "Modify", "Search"],
     cardOneTitle: [
-      "需要创建的账户的信息",
-      "需要删除的账户的信息",
-      "更新前的账户信息",
-      "需要搜索的账户信息"
+      [
+        "需要创建的账户的信息",
+        "需要删除的账户的信息",
+        "更新前的账户信息",
+        "需要搜索的账户信息"
+      ],
+      [
+        "需要创建的所有者的信息",
+        "需要删除的所有者的信息",
+        "更新前的所有者信息",
+        "需要搜索的所有者信息"
+      ]
     ],
     cardStatusTitle: [
-      "创建账户状态",
-      "删除账户状态",
-      "更新账户状态",
-      "搜索账户状态"
+      ["创建账户结果", "删除账户结果", "更新账户结果", "搜索账户结果"],
+      ["创建所有者结果", "删除所有者结果", "更新所有者结果", "搜索所有者结果"]
     ],
-    inputData: {
+    inputDataAccount: {
       id: "",
       balance: "",
       openDate: "",
       type: "",
+      openBank: "",
       checkingAccountCredit: "",
       savingsAccountRate: "",
-      savingsAccountCurrencyType: "",
+      savingsAccountCurrencyType: ""
+    },
+    modifyDataAccount: {
+      id: "",
+      balance: "",
+      openDate: "",
+      type: "",
+      openBank: "",
+      checkingAccountCredit: "",
+      savingsAccountRate: "",
+      savingsAccountCurrencyType: ""
+    },
+    inputDataOwner: {
+      id: "",
+      type: "",
       openBank: "",
       customerID: "",
       lastVisitDate: ""
     },
-    modifyData: {
+    modifyDataOwner: {
       id: "",
-      balance: "",
-      openDate: "",
       type: "",
-      checkingAccountCredit: "",
-      savingsAccountRate: "",
-      savingsAccountCurrencyType: "",
       openBank: "",
       customerID: "",
       lastVisitDate: ""
-    }
+    },
+    receiveData: ""
   }),
   computed: {
-    formOneEmpty: function() {
-      let result = this.inputData["id"].length == 0;
-      for (let item in this.inputData) {
-        result = result && this.inputData[item].length == 0;
+    formInputDataAccountEmpty: function() {
+      let result = this.inputDataAccount["id"].length == 0;
+      for (let item in this.inputDataAccount) {
+        result = result && this.inputDataAccount[item].length == 0;
       }
       return result;
     },
-    formTwoEmpty: function() {
-      let result = this.modifyData["id"].length == 0;
-      for (let item in this.modifyData) {
-        result = result && this.modifyData[item].length == 0;
+    formModifyDataAccountEmpty: function() {
+      let result = this.modifyDataAccount["id"].length == 0;
+      for (let item in this.modifyDataAccount) {
+        result = result && this.modifyDataAccount[item].length == 0;
       }
       return result;
     },
-    checkFormOneCreate: function() {
+    formInputDataOwnerEmpty: function() {
+      let result = this.inputDataOwner["id"].length == 0;
+      for (let item in this.inputDataOwner) {
+        result = result && this.inputDataOwner[item].length == 0;
+      }
+      return result;
+    },
+    formModifyDataOwnerEmpty: function() {
+      let result = this.modifyDataOwner["id"].length == 0;
+      for (let item in this.modifyDataOwner) {
+        result = result && this.modifyDataOwner[item].length == 0;
+      }
+      return result;
+    },
+    checkAccountCreate: function() {
       let result = true;
-      if (this.inputData.type == "Checking") {
-        for (let item in this.inputData) {
+      if (this.inputDataAccount.type == "Checking") {
+        for (let item in this.inputDataAccount) {
           if (
             item == "savingsAccountRate" ||
             item == "savingsAccountCurrencyType"
           ) {
             continue;
           }
-          result = result && this.inputData[item] != "";
+          result = result && this.inputDataAccount[item] != "";
         }
-      } else if (this.inputData.type == "Savings") {
-        for (let item in this.inputData) {
+      } else if (this.inputDataAccount.type == "Savings") {
+        for (let item in this.inputDataAccount) {
           if (item == "checkingAccountCredit") {
             continue;
           }
-          result = result && this.inputData[item] != "";
+          result = result && this.inputDataAccount[item] != "";
         }
       } else {
         result = false;
       }
       return result;
     },
+    checkOwnerCreate: function() {
+      let result = true;
+      for (let item in this.inputDataOwner) {
+        result = result && this.inputDataOwner[item] != 0;
+      }
+      return result;
+    },
     resetBtnValid: function() {
       let result = false;
-      if (this.tab == 2) {
-        // if modify
-        result = !this.formOneEmpty || !this.formTwoEmpty;
+      if (this.tabOut == 0) {
+        if (this.tabIn == 2) {
+          // if modify
+          result =
+            !this.formInputDataAccountEmpty || !this.formModifyDataAccountEmpty;
+        } else {
+          result = !this.formInputDataAccountEmpty;
+        }
       } else {
-        result = !this.formOneEmpty;
+        if (this.tabIn == 2) {
+          // if modify
+          result =
+            !this.formInputDataOwnerEmpty || !this.formModifyDataOwnerEmpty;
+        } else {
+          result = !this.formInputDataOwnerEmpty;
+        }
       }
       return result;
     },
     commitBtnValid: function() {
       let result = false;
-      if (this.tab == 0) {
-        // if modify
-        result = this.checkFormOneCreate;
-      } else if (this.tab == 1) {
-        result = !this.formOneEmpty;
-      } else if (this.tab == 2) {
-        result = !this.formOneEmpty && !this.formTwoEmpty;
+      if (this.tabOut == 0) {
+        if (this.tabIn == 0) {
+          // if modify
+          result = this.checkAccountCreate && this.formCheck_0;
+        } else if (this.tabIn == 1) {
+          result =
+            !this.formInputDataAccountEmpty &&
+            this.inputDataAccount.type != "" &&
+            this.formCheck_0;
+        } else if (this.tabIn == 2) {
+          result =
+            !this.formInputDataAccountEmpty &&
+            !this.formModifyDataAccountEmpty &&
+            this.inputDataAccount.type != "" &&
+            this.formCheck_0 &&
+            this.formCheck_1;
+        } else {
+          result =
+            !this.formInputDataAccountEmpty &&
+            this.inputDataAccount.type != "" &&
+            this.formCheck_0;
+        }
       } else {
-        result = !this.formOneEmpty;
+        if (this.tabIn == 0) {
+          // if modify
+          result = this.checkOwnerCreate;
+        } else if (this.tabIn == 1) {
+          result =
+            !this.formInputDataOwnerEmpty && this.inputDataOwner.type != "";
+        } else if (this.tabIn == 2) {
+          result =
+            !this.formInputDataOwnerEmpty &&
+            !this.formModifyDataOwnerEmpty &&
+            this.inputDataOwner.type != "";
+        } else {
+          result =
+            !this.formInputDataOwnerEmpty && this.inputDataOwner.type != "";
+        }
       }
       return result;
+    },
+    postData: function() {
+      return {
+        tab_out: this.tabOut.toString(),
+        tab_in: this.tabIn.toString(),
+
+        i_account_id:
+          this.tabOut == 0 ? this.inputDataAccount.id : this.inputDataOwner.id,
+        i_account_balance: this.inputDataAccount.balance,
+        i_account_open_bank:
+          this.tabOut == 0
+            ? this.inputDataAccount.openBank
+            : this.inputDataOwner.openBank,
+        i_account_type:
+          this.tabOut == 0
+            ? this.inputDataAccount.type
+            : this.inputDataOwner.type,
+        i_account_open_date: this.inputDataAccount.openDate,
+        i_account_last_visit_date: this.inputDataOwner.lastVisitDate,
+        i_account_customer_id: this.inputDataOwner.customerID,
+        i_account_credit: this.inputDataAccount.checkingAccountCredit,
+        i_account_rate: this.inputDataAccount.savingsAccountRate,
+        i_account_currency_type: this.inputDataAccount
+          .savingsAccountCurrencyType,
+
+        m_account_id:
+          this.tabOut == 0
+            ? this.modifyDataAccount.id
+            : this.modifyDataOwner.id,
+        m_account_balance: this.modifyDataAccount.balance,
+        m_account_open_bank:
+          this.tabOut == 0
+            ? this.modifyDataAccount.openBank
+            : this.modifyDataOwner.openBank,
+        m_account_type:
+          this.tabOut == 0
+            ? this.modifyDataAccount.type
+            : this.modifyDataOwner.type,
+        m_account_open_date: this.modifyDataAccount.openDate,
+        m_account_last_visit_date: this.modifyDataOwner.lastVisitDate,
+        m_account_customer_id: this.modifyDataOwner.customerID,
+        m_account_credit: this.modifyDataAccount.checkingAccountCredit,
+        m_account_rate: this.modifyDataAccount.savingsAccountRate,
+        m_account_currency_type: this.modifyDataAccount
+          .savingsAccountCurrencyType
+      };
     }
   },
   methods: {
     resetForm: function() {
-      for (let item in this.inputData) {
-        this.inputData[item] = "";
+      if (this.tabOut == 0) {
+        if (this.tabIn == 2) {
+          // if modify
+          for (let item in this.inputDataAccount) {
+            this.inputDataAccount[item] = "";
+          }
+          for (let item in this.modifyDataAccount) {
+            this.modifyDataAccount[item] = "";
+          }
+        } else {
+          for (let item in this.inputDataAccount) {
+            this.inputDataAccount[item] = "";
+          }
+        }
+      } else {
+        if (this.tabIn == 2) {
+          // if modify
+          for (let item in this.inputDataOwner) {
+            this.inputDataOwner[item] = "";
+          }
+          for (let item in this.modifyDataOwner) {
+            this.modifyDataOwner[item] = "";
+          }
+        } else {
+          for (let item in this.inputDataOwner) {
+            this.inputDataOwner[item] = "";
+          }
+        }
       }
     },
     commitForm: function() {
-      alert(this.checkFormOneCreate);
+      this.$axios
+        .post("/account-management", this.postData)
+        .then(response => {
+          this.receiveData = response.data;
+        })
+        .catch(function(error) {
+          alert(error);
+        });
     }
   }
 };

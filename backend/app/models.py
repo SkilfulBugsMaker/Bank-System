@@ -196,14 +196,18 @@ class Account(db.Model):
     # end attributes
 
     # start foreign keys
-    # no foreign keys
+    a_open_bank = db.Column(
+        db.String(NAME_LEN),
+        db.ForeignKey('sub_bank.sb_name'),
+        nullable=False
+    )
     # end foreign keys
 
-    def __init__(self, a_code, a_balance, a_open_date):
+    def __init__(self, a_code, a_balance, a_open_date, a_open_bank):
         self.a_code = a_code
-        self.a_balance = a_balance
+        self.a_balance = float(a_balance)
         self.a_open_date = a_open_date
-
+        self.a_open_bank = a_open_bank
     pass
 
 
@@ -330,7 +334,7 @@ class CheckingAccountRecord(db.Model):
 
 class SavingsAccountRecord(db.Model):
     # start attributes
-    sar_last_visit_time = db.Column(db.Date, nullable=True)
+    sar_last_visit_time = db.Column(db.Date, nullable=False)
     # end attributes
 
     # start foreign keys

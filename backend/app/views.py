@@ -1,6 +1,7 @@
 from flask_restful import Api, Resource
 from .models import *
 from flask_restful import reqparse
+import datetime
 import json
 
 # api instance
@@ -30,6 +31,9 @@ class BusinessStatistic(Resource):
             'end_time': args['end_time'],
             'data': []
         }
+        start_time = datetime.date(*map(int, args['start_time'].split('-')))
+        end_time = datetime.date(*map(int, args['end_time'].split('-')))
+
         for b in banks:
             users = 0
             money = 0
@@ -42,9 +46,9 @@ class BusinessStatistic(Resource):
                     tmp = Account.query.filter(
                         Account.a_code == id
                     ).filter(
-                        Account.a_open_date >= args["start_time"]
+                        Account.a_open_date >= start_time
                     ).filter(
-                        Account.a_open_date < args["end_time"]
+                        Account.a_open_date < end_time
                     ).first()
                     if tmp is None:
                         continue
@@ -58,9 +62,9 @@ class BusinessStatistic(Resource):
                     tmp = LoanPayment.query.filter(
                         LoanPayment.lp_l_code == l.l_code
                     ).filter(
-                        LoanPayment.lp_date >= args["start_time"]
+                        LoanPayment.lp_date >= start_time
                     ).filter(
-                        LoanPayment.lp_date < args["end_time"]
+                        LoanPayment.lp_date < end_time
                     ).all()
                     for t in tmp:
                         money = money + t.lp_money
@@ -369,77 +373,90 @@ class CustomerManagement(Resource):
 class AccountManagement(Resource):
     parser = reqparse.RequestParser()
     parser.add_argument(
-        'tab', type=str, required=True, choices=['0', '1', '2', '3'],
-        help="tab must in ['0', '1', '2', '3']"
+        'tab_out', type=str, required=True, choices=['0', '1'],
+        help="tab_out must in ['0', '1']"
+    )
+    parser.add_argument(
+        'tab_in', type=str, required=True, choices=['0', '1', '2', '3'],
+        help="tab_in must in ['0', '1', '2', '3']"
     )
     parser.add_argument(
         'i_account_id', type=str, required=False
     )
     parser.add_argument(
-        'i_account_balance', type=float, required=False
+        'i_account_balance', type=str, required=False
     )
     parser.add_argument(
-        'i_account_openbank', type=str, required=False
+        'i_account_open_bank', type=str, required=False
     )
     parser.add_argument(
-        'i_account_lastvisitdate', type=str, required=False
+        'i_account_open_date', type=str, required=False
     )
     parser.add_argument(
-        'i_account_type', type=str, required=True, choices=['', 'Checking', 'Savings'],
+        'i_account_last_visit_date', type=str, required=False
+    )
+    parser.add_argument(
+        'i_account_type', type=str, required=True, choices=['Checking', 'Savings'],
+        help="Account type must in ['Checking', 'Savings']"
     )
     parser.add_argument(
         'i_account_customer_id', type=str, required=False
     )
     parser.add_argument(
-        'i_account_credit', type=float, required=False
+        'i_account_credit', type=str, required=False
     )
     parser.add_argument(
-        'i_account_rate', type=float, required=False
+        'i_account_rate', type=str, required=False
     )
     parser.add_argument(
-        'i_account_currency_type', type=float, required=False
+        'i_account_currency_type', type=str, required=False
     )
 
     parser.add_argument(
         'm_account_id', type=str, required=False
     )
     parser.add_argument(
-        'm_account_balance', type=float, required=False
+        'm_account_open_date', type=str, required=False
     )
     parser.add_argument(
-        'm_account_openbank', type=str, required=False
+        'm_account_balance', type=str, required=False
     )
     parser.add_argument(
-        'm_account_type', type=str, required=True, choices=['', 'Checking', 'Savings'],
+        'm_account_open_bank', type=str, required=False
+    )
+    parser.add_argument(
+        'm_account_type', type=str, required=False,
     )
     parser.add_argument(
         'm_account_customer_id', type=str, required=False
     )
     parser.add_argument(
-        'm_account_credit', type=float, required=False
+        'm_account_credit', type=str, required=False
     )
     parser.add_argument(
-        'm_account_rate', type=float, required=False
+        'm_account_rate', type=str, required=False
     )
     parser.add_argument(
-        'm_account_currency_type', type=float, required=False
+        'm_account_currency_type', type=str, required=False
     )
     parser.add_argument(
-        'm_account_lastvisitdate', type=str, required=False
+        'm_account_last_visit_date', type=str, required=False
     )
 
     def post(self):
         args = self.parser.parse_args()
         result = {
             'status': True,
-            'tab': args['tab'],
+            'tab_in': args['tab_in'],
+            'tab_out': args['tab_out'],
             'message': '',
             'data': [],
         }
         convert_dict_account = {
             'i_account_id': 'a_code',
             'i_account_balance': 'a_balance',
-            'i_account_opendate': 'a_open_date'
+            'i_account_open_date': 'a_open_date',
+            'i_account_open_bank': 'a_open_bank'
         }
         convert_dict_savings_account = {
             'i_account_id': 'sa_a_code',
@@ -451,78 +468,338 @@ class AccountManagement(Resource):
             'i_account_id': 'ca_a_code'
         }
         convert_dict_checking_account_record = {
-            'i_account_lastvisitdate': 'car_last_visit_time',
+            'i_account_last_visit_date': 'car_last_visit_time',
             'i_account_customer_id': 'car_c_identity_code',
-            'i_account_openbank': 'car_sb_name',
+            'i_account_open_bank': 'car_sb_name',
             'i_account_id': 'car_a_code'
         }
         convert_dict_savings_account_record = {
-            'i_account_lastvisitdate': 'sar_last_visit_time',
+            'i_account_last_visit_date': 'sar_last_visit_time',
             'i_account_customer_id': 'sar_c_identity_code',
-            'i_account_openbank': 'sar_sb_name',
+            'i_account_open_bank': 'sar_sb_name',
             'i_account_id': 'sar_a_code'
         }
 
-
-        if args['tab'] == '0':
-            # insert
-
-            if result['status']:
-                # check if account id is exist or not
-                account = Account.query.filter_by(
-                    a_code=args['i_account_id']
-                ).first()
-                if account is not None:
-                    result['status'] = False
-                    result['message'] = 'Account already exist!'
-            if result['status']:
-                # check if sub bank is exist
-                bank = SubBank.query.filter_by(
-                    sb_name=args['i_account_openbank']
-                ).first()
-                if bank is None:
-                    result['status'] = False
-                    result['message'] = 'Bank does not exist!'
-            if result['status']:
-                # check if the customer already has an account in the bank
-                if args['i_account_type'] == 'Savings':
-                    account_record = SavingsAccountRecord.query.filter_by(
-                        sar_c_identity_code=args['i_account_customer_id'],
-                        sar_sb_name=args['i_account_openbank']
+        if args['tab_out'] == '0':
+            if args['tab_in'] == '0':
+                # insert account
+                if result['status']:
+                    # check if account id is exist or not
+                    account = Account.query.filter_by(
+                        a_code=args['i_account_id']
                     ).first()
-                else:
-                    account_record = CheckingAccountRecord.query.filter_by(
-                        car_c_identity_code=args['i_account_customer_id'],
-                        car_sb_name=args['i_account_openbank']
+                    if account is not None:
+                        result['status'] = False
+                        result['message'] = 'Account already exist!'
+                if result['status']:
+                    # check if sub bank is exist
+                    bank = SubBank.query.filter_by(
+                        sb_name=args['i_account_open_bank']
                     ).first()
-                if account_record is not None:
-                    result['status'] = False
-                    result['message'] = 'Customer already has the same type account in this bank!'
-            if result['status']:
-                # insert
-                account_info = {convert_dict_account[k]: args[k] for k in convert_dict_account}
-                db.session.add(Account(**account_info))
+                    if bank is None:
+                        result['status'] = False
+                        result['message'] = 'Bank does not exist!'
+                if result['status']:
+                    # insert
+                    account_info = {convert_dict_account[k]: args[k] for k in convert_dict_account}
+                    db.session.add(Account(**account_info))
+                    if args['i_account_type'] == 'Savings':
+                        savings_account_info = {convert_dict_savings_account[k]: args[k] for k in
+                                                convert_dict_savings_account}
+                        db.session.add(SavingsAccount(**savings_account_info))
+                    else:
+                        checking_account_info = {convert_dict_checking_account[k]: args[k] for k in
+                                                 convert_dict_checking_account}
+                        db.session.add(CheckingAccount(**checking_account_info))
+                    db.session.commit()
+                    result['message'] = "Insert account successfully"
+
+            elif args['tab_in'] == '1':
+                account_queries = {convert_dict_account[k]: args[k] for k in convert_dict_account if args[k] != ''}
+                ids = [item.a_code for item in Account.query.filter_by(**account_queries).all()]
                 if args['i_account_type'] == 'Savings':
-                    savings_account_info = {convert_dict_savings_account[k]: args[k] for k in convert_dict_savings_account}
-                    savings_account_record = {convert_dict_savings_account_record[k]: args[k] for k in convert_dict_savings_account_record}
-                    db.session.add(SavingsAccount(**savings_account_info))
-                    db.session.add(SavingsAccountRecord(**savings_account_record))
+                    savings_account_queries = {convert_dict_savings_account[k]: args[k] for k in
+                                               convert_dict_savings_account if args[k] != ''}
+                    id_accounts = [item.sa_a_code for item in
+                                   SavingsAccount.query.filter_by(**savings_account_queries).all()]
                 else:
-                    checking_account_info = {convert_dict_checking_account[k]: args[k] for k in convert_dict_checking_account}
-                    checking_account_record = {convert_dict_checking_account_record[k]: args[k] for k in convert_dict_checking_account_record}
-                    db.session.add(CheckingAccount(**checking_account_info))
-                    db.session.add(CheckingAccountRecord(**checking_account_record))
-
-                db.session.commit()
-                result['message'] = "Insert successfully"
-
-        elif args['tab'] == '1':
-        elif args['tab'] == '2':
+                    checking_account_queries = {convert_dict_checking_account[k]: args[k] for k in
+                                                convert_dict_checking_account if args[k] != ''}
+                    id_accounts = [item.ca_a_code for item in
+                                   CheckingAccount.query.filter_by(**checking_account_queries).all()]
+                accounts_id = [item for item in ids if item in id_accounts]
+                if len(accounts_id) != 0:
+                    for a_id in accounts_id:
+                        # delete account
+                        db.session.delete(Account.query.filter_by(
+                            a_code=a_id
+                        ).first())
+                        if args['i_account_type'] == 'Savings':
+                            db.session.delete(SavingsAccount.query.filter_by(
+                                sa_a_code=a_id
+                            ).first())
+                            records = SavingsAccountRecord.query.filter_by(
+                                sar_a_code=a_id
+                            ).all()
+                            for r in records:
+                                db.session.delete(r)
+                        else:
+                            db.session.delete(CheckingAccount.query.filter_by(
+                                ca_a_code=a_id
+                            ).first())
+                            records = CheckingAccountRecord.query.filter_by(
+                                car_a_code=a_id
+                            ).all()
+                            for r in records:
+                                db.session.delete(r)
+                        db.session.commit()
+                    result['message'] = 'Delete %d accounts successfully!' % len(accounts_id)
+                else:
+                    result['status'] = False
+                    result['message'] = 'Can not find any accounts to delete!'
+            elif args['tab_in'] == '2':
+                account_queries = {convert_dict_account[k]: args[k] for k in convert_dict_account if args[k] != ''}
+                ids = [item.a_code for item in Account.query.filter_by(**account_queries).all()]
+                if args['i_account_type'] == 'Savings':
+                    savings_account_queries = {convert_dict_savings_account[k]: args[k] for k in
+                                               convert_dict_savings_account if args[k] != ''}
+                    id_accounts = [item.sa_a_code for item in
+                                   SavingsAccount.query.filter_by(**savings_account_queries).all()]
+                else:
+                    checking_account_queries = {convert_dict_checking_account[k]: args[k] for k in
+                                                convert_dict_checking_account if args[k] != ''}
+                    id_accounts = [item.ca_a_code for item in
+                                   CheckingAccount.query.filter_by(**checking_account_queries).all()]
+                accounts_id = [item for item in ids if item in id_accounts]
+                if len(accounts_id) == 0:
+                    result['status'] = False
+                    result['message'] = 'Can not find any accounts to modify!'
+                if result['status']:
+                    for a_id in accounts_id:
+                        if args['m_account_balance'] != '':
+                            # if modify balance
+                            acc = Account.query.filter_by(
+                                a_code=a_id
+                            ).first()
+                            acc.a_balance = args['m_account_balance']
+                        if args['i_account_type'] == 'Savings':
+                            acc = SavingsAccount.query.filter_by(
+                                sa_a_code=a_id
+                            ).first()
+                            if args['m_account_rate'] != '':
+                                acc.sa_rate = args['m_account_rate']
+                            elif args['m_account_currency_type']:
+                                acc.sa_currency_type = args['m_account_currency_type']
+                        else:
+                            acc = CheckingAccount.query.filter_by(
+                                ca_a_code=a_id
+                            ).first()
+                            if args['m_account_credit'] != '':
+                                acc.ca_credit = args['m_account_credit']
+                        db.session.commit()
+                    result['message'] = 'Modify %d accounts successfully!' % len(accounts_id)
+            else:
+                # query
+                account_queries = {convert_dict_account[k]: args[k] for k in convert_dict_account if args[k] != ''}
+                ids = [item.a_code for item in Account.query.filter_by(**account_queries).all()]
+                if args['i_account_type'] == 'Savings':
+                    savings_account_queries = {convert_dict_savings_account[k]: args[k] for k in
+                                               convert_dict_savings_account if args[k] != ''}
+                    id_accounts = [item.sa_a_code for item in
+                                   SavingsAccount.query.filter_by(**savings_account_queries).all()]
+                else:
+                    checking_account_queries = {convert_dict_checking_account[k]: args[k] for k in
+                                                convert_dict_checking_account if args[k] != ''}
+                    # checking_account_record_queries = {convert_dict_checking_account_record[k]: args[k] for k in
+                    #                                    convert_dict_checking_account_record if args[k] != ''}
+                    id_accounts = [item.ca_a_code for item in
+                                   CheckingAccount.query.filter_by(**checking_account_queries).all()]
+                    # id_records = [item.car_a_code for item in
+                    #               CheckingAccountRecord.query.filter_by(**checking_account_record_queries).all()]
+                # join
+                accounts_id = [item for item in ids if item in id_accounts]
+                if len(accounts_id) != 0:
+                    for item in accounts_id:
+                        account_info = Account.query.filter_by(a_code=item).first()
+                        tmp = {
+                            'account_type': args['i_account_type'],
+                            'account_id': item,
+                            'account_balance': str(account_info.a_balance),
+                            'account_open_date': str(account_info.a_open_date),
+                            'account_open_bank': account_info.a_open_bank
+                        }
+                        if args['i_account_type'] == 'Savings':
+                            account_ty_info = SavingsAccount.query.filter_by(sa_a_code=item).first()
+                            tmp['account_rate'] = str(account_ty_info.sa_rate)
+                            tmp['account_currency_type'] = account_ty_info.sa_currency_type
+                            tmp['account_credit'] = 'Null'
+                        else:
+                            account_ty_info = CheckingAccount.query.filter_by(ca_a_code=item).first()
+                            tmp['account_credit'] = str(account_ty_info.ca_credit)
+                            tmp['account_rate'] = 'Null'
+                            tmp['account_currency_type'] = 'Null'
+                        result['data'].append(tmp)
+                    result['message'] = 'Find results!'
+                else:
+                    result['status'] = False
+                    result['message'] = 'Can not find result!'
         else:
+            if args['tab_in'] == '0':
+                # insert record
+                if result['status']:
+                    # check if customer exists
+                    customer = Customer.query.filter_by(
+                        c_identity_code=args['i_account_customer_id']
+                    ).first()
+                    if customer is None:
+                        result['status'] = False
+                        result['message'] = 'Customer does not exist!'
 
+                if result['status']:
+                    # check if bank exist
+                    bank = SubBank.query.filter_by(
+                        sb_name=args['i_account_open_bank']
+                    ).first()
+                    if bank is None:
+                        result['status'] = False
+                        result['message'] = 'Bank does not exist!'
+
+                if result['status']:
+                    # check if account exist
+                    account = Account.query.filter_by(
+                        a_code=args['i_account_id']
+                    ).first()
+                    if account is None:
+                        result['status'] = False
+                        result['message'] = 'Account does not exist!'
+
+                if result['status']:
+                    # check if the customer already has an account in the bank
+                    if args['i_account_type'] == 'Savings':
+                        account_record = SavingsAccountRecord.query.filter_by(
+                            sar_c_identity_code=args['i_account_customer_id'],
+                            sar_sb_name=args['i_account_open_bank']
+                        ).first()
+                    else:
+                        account_record = CheckingAccountRecord.query.filter_by(
+                            car_c_identity_code=args['i_account_customer_id'],
+                            car_sb_name=args['i_account_open_bank']
+                        ).first()
+                    if account_record is not None:
+                        result['status'] = False
+                        result['message'] = 'Customer already has the same type account in this bank!'
+
+                if result['status']:
+                    # check if the account type.
+                    if args['i_account_type'] == 'Savings':
+                        account = SavingsAccount.query.filter_by(
+                            sa_a_code=args['i_account_id']
+                        ).first()
+                    else:
+                        account = CheckingAccount.query.filter_by(
+                            ca_a_code=args['i_account_id']
+                        ).first()
+                    if account is None:
+                        result['status'] = False
+                        result['message'] = 'Account type and input are inconsistent!'
+
+                if result['status']:
+                    # check consistency on the open bank
+                    account = Account.query.filter_by(
+                        a_code=args['i_account_id']
+                    ).first()
+                    a_open_bank = account.a_open_bank
+                    if a_open_bank != args['i_account_open_bank']:
+                        result['status'] = False
+                        result['message'] = "Open Bank and input are inconsistent！"
+
+                if result['status']:
+                    if args['i_account_type'] == 'Savings':
+                        d = {convert_dict_savings_account_record[k]: args[k] for k in convert_dict_savings_account_record}
+                        db.session.add(SavingsAccountRecord(**d))
+                    else:
+                        d = {convert_dict_checking_account_record[k]: args[k] for k in convert_dict_checking_account_record}
+                        db.session.add(CheckingAccountRecord(**d))
+                    db.session.commit()
+                    result['message'] = 'Insert record successfully!'
+
+            elif args['tab_in'] == '1':
+                if args['i_account_type'] == "Savings":
+                    query = {convert_dict_savings_account_record[k]: args[k] for k in
+                             convert_dict_savings_account_record if args[k] != ''}
+                    records = SavingsAccountRecord.query.filter_by(**query).all()
+
+                else:
+                    query = {convert_dict_checking_account_record[k]: args[k] for k in
+                             convert_dict_checking_account_record if args[k] != ''}
+                    records = CheckingAccountRecord.query.filter_by(**query).all()
+                if len(records) == 0:
+                    result['status'] = False
+                    result['message'] = 'Not find records to delete!'
+                if result['status']:
+                    num = len(records)
+                    for r in records:
+                        db.session.delete(r)
+                        db.session.commit()
+                    result['message'] = 'Delete %d records!' % num
+
+            elif args['tab_in'] == '2':
+                if args['i_account_type'] == "Savings":
+                    query = {convert_dict_savings_account_record[k]: args[k] for k in
+                             convert_dict_savings_account_record if args[k] != ''}
+                    records = SavingsAccountRecord.query.filter_by(**query).all()
+
+                else:
+                    query = {convert_dict_checking_account_record[k]: args[k] for k in
+                             convert_dict_checking_account_record if args[k] != ''}
+                    records = CheckingAccountRecord.query.filter_by(**query).all()
+                if len(records) == 0:
+                    result['status'] = False
+                    result['message'] = 'Not find records to modify!'
+                if result['status']:
+                    num = len(records)
+                    for r in records:
+                        if args['i_account_type'] == "Savings":
+                            r.sar_last_visit_time = args['m_account_last_visit_date']
+                        else:
+                            r.car_last_visit_time = args['m_account_last_visit_date']
+                        db.session.commit()
+                    result['message'] = 'Modify %d records!' % num
+            else:
+                if args['i_account_type'] == "Savings":
+                    query = {convert_dict_savings_account_record[k]: args[k] for k in
+                             convert_dict_savings_account_record if args[k] != ''}
+                    records = SavingsAccountRecord.query.filter_by(**query).all()
+                    for r in records:
+                        result['data'].append({
+                            'account_id': r.sar_a_code,
+                            'customer_id': r.sar_c_identity_code,
+                            'account_type': args['i_account_type'],
+                            'account_open_bank': r.sar_sb_name,
+                            'account_last_visit_date': str(r.sar_last_visit_time)
+                        })
+                else:
+                    query = {convert_dict_checking_account_record[k]: args[k] for k in
+                             convert_dict_checking_account_record if args[k] != ''}
+                    records = CheckingAccountRecord.query.filter_by(**query).all()
+                    for r in records:
+                        result['data'].append({
+                            'account_id': r.car_a_code,
+                            'customer_id': r.car_c_identity_code,
+                            'account_type': args['i_account_type'],
+                            'account_open_bank': r.car_sb_name,
+                            'account_last_visit_date': str(r.car_last_visit_time)
+                        })
+        return result
+
+
+class LoanManagement(Resource):
+
+    pass
 
 
 api.add_resource(BusinessStatistic, '/api/business-statistic')
 api.add_resource(CustomerManagement, '/api/customer-management')
 api.add_resource(AccountManagement, '/api/account-management')
+api.add_resource((LoanManagement, '/api/loan-management'))
 
