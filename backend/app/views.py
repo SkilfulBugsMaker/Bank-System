@@ -300,6 +300,10 @@ class CustomerManagement(Resource):
                         result['message'] = 'Can not specify which primary key to modify!'
                         result['status'] = False
                     if result['status']:
+                        sql = '''
+                        SET FOREIGN_KEY_CHECKS=0;
+                        '''
+                        db.session.execute(sql)
                         # check new primary key
                         customers_check = Customer.query.filter_by(
                             c_identity_code=modify_data['c_identity_code']
@@ -351,6 +355,10 @@ class CustomerManagement(Resource):
                             for i in range(len(customer_loans)):
                                 customer_loans[i].lc_c_identity_code = modify_data['c_identity_code']
                             db.session.commit()
+                        sql = '''
+                        SET FOREIGN_KEY_CHECKS=1;
+                        '''
+                        db.session.execute(sql)
                         result['message'] = 'Modify successfully'
 
         else:
