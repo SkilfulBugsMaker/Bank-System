@@ -511,6 +511,7 @@ class AccountManagement(Resource):
                     # insert
                     account_info = {convert_dict_account[k]: args[k] for k in convert_dict_account}
                     db.session.add(Account(**account_info))
+                    db.session.commit()
                     if args['i_account_type'] == 'Savings':
                         savings_account_info = {convert_dict_savings_account[k]: args[k] for k in
                                                 convert_dict_savings_account}
