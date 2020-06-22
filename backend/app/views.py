@@ -331,7 +331,7 @@ class CustomerManagement(Resource):
                                 c.c_loan_staff_identity_code = modify_data['c_loan_staff_identity_code']
                             if modify_data['c_account_staff_identity_code'] != '':
                                 c.c_account_staff_identity_code = modify_data['c_account_staff_identity_code']
-
+                            db.session.commit()
                             # modify Account and loan
 
                             car_accounts = CheckingAccountRecord.query.filter_by(
@@ -954,6 +954,14 @@ class LoanManagement(Resource):
                     if customer is None:
                         result['status'] = False
                         result['message'] = 'Customer does not exists!'
+                if result['status']:
+                    loan_customer = LoanCustomer.query.filter_by(
+                        lc_c_identity_code=args['customer_id'],
+                        lc_l_code=args['loan_id']
+                    ).first()
+                    if loan_customer is not None:
+                        result['status'] = False
+                        result['message'] = 'Customer-Loan already exists!'
                 if result['status']:
                     info = {convert_dict_loan_customer[k]: args[k] for k in convert_dict_loan_customer}
                     db.session.add(LoanCustomer(**info))
