@@ -40,12 +40,14 @@ class Customer(db.Model):
     c_loan_staff_identity_code = db.Column(
         db.String(IDENTITY_CODE_LEN),
         db.ForeignKey('staff.s_identity_code'),
-        nullable=True
+        nullable=True,
+        ondelete='CASCADE', onupdate='CASCADE'
     )
     c_account_staff_identity_code = db.Column(
         db.String(IDENTITY_CODE_LEN),
         db.ForeignKey('staff.s_identity_code'),
-        nullable=True
+        nullable=True,
+        ondelete='CASCADE', onupdate='CASCADE'
     )
     # end foreign keys
 
@@ -96,7 +98,8 @@ class Staff(db.Model):
     s_d_code = db.Column(
         db.String(CODE_LEN),
         db.ForeignKey('department.d_code'),
-        nullable=True
+        nullable=True,
+        ondelete='CASCADE', onupdate='CASCADE'
     )
     # end foreign keys
 
@@ -143,12 +146,14 @@ class Department(db.Model):
     d_m_identity_code = db.Column(
         db.String(IDENTITY_CODE_LEN),
         db.ForeignKey('manager.m_identity_code'),
-        nullable=True
+        nullable=True,
+        ondelete='CASCADE', onupdate='CASCADE'
     )
     d_sb_name = db.Column(
         db.String(NAME_LEN),
         db.ForeignKey('sub_bank.sb_name'),
-        nullable=True
+        nullable=True,
+        ondelete='CASCADE', onupdate='CASCADE'
     )
     # end foreign keys
 
@@ -169,14 +174,16 @@ class Manager(db.Model):
     m_identity_code = db.Column(
         db.String(IDENTITY_CODE_LEN),
         db.ForeignKey('staff.s_identity_code'),
-        primary_key=True)
+        primary_key=True
+    )
     # end attributes
 
     # start foreign keys
     m_d_code = db.Column(
         db.String(CODE_LEN),
         db.ForeignKey('department.d_code'),
-        nullable=True
+        nullable=True,
+        ondelete='CASCADE', onupdate='CASCADE'
     )
     # end foreign keys
 
@@ -199,7 +206,8 @@ class Account(db.Model):
     a_open_bank = db.Column(
         db.String(NAME_LEN),
         db.ForeignKey('sub_bank.sb_name'),
-        nullable=False
+        nullable=False,
+        ondelete='CASCADE', onupdate='CASCADE'
     )
     # end foreign keys
 
@@ -220,7 +228,8 @@ class CheckingAccount(db.Model):
     ca_a_code = db.Column(
         db.String(CODE_LEN),
         db.ForeignKey('account.a_code'),
-        primary_key=True
+        primary_key=True,
+        ondelete='CASCADE', onupdate='CASCADE'
     )
     # end foreign keys
 
@@ -241,7 +250,8 @@ class SavingsAccount(db.Model):
     sa_a_code = db.Column(
         db.String(CODE_LEN),
         db.ForeignKey('account.a_code'),
-        primary_key=True
+        primary_key=True,
+        ondelete='CASCADE', onupdate='CASCADE'
     )
     # end foreign keys
 
@@ -263,7 +273,8 @@ class Loan(db.Model):
     l_sb_name = db.Column(
         db.String(NAME_LEN),
         db.ForeignKey('sub_bank.sb_name'),
-        nullable=True
+        nullable=True,
+        ondelete='CASCADE', onupdate='CASCADE'
     )
     # end foreign keys
 
@@ -287,7 +298,8 @@ class LoanPayment(db.Model):
     lp_l_code = db.Column(
         db.String(CODE_LEN),
         db.ForeignKey('loan.l_code'),
-        primary_key=True
+        primary_key=True,
+        ondelete='CASCADE', onupdate='CASCADE'
     )
     # end foreign keys
 
@@ -309,17 +321,20 @@ class CheckingAccountRecord(db.Model):
     car_c_identity_code = db.Column(
         db.String(IDENTITY_CODE_LEN),
         db.ForeignKey('customer.c_identity_code'),
-        primary_key=True
+        primary_key=True,
+        ondelete='CASCADE', onupdate='CASCADE'
     )
     car_sb_name = db.Column(
         db.String(NAME_LEN),
         db.ForeignKey('sub_bank.sb_name'),
-        primary_key=True
+        primary_key=True,
+        ondelete='CASCADE', onupdate='CASCADE'
     )
     car_a_code = db.Column(
         db.String(CODE_LEN),
         db.ForeignKey('account.a_code'),
-        nullable=True
+        nullable=True,
+        ondelete='CASCADE', onupdate='CASCADE'
     )
     # end foreign keys
 
@@ -341,17 +356,21 @@ class SavingsAccountRecord(db.Model):
     sar_c_identity_code = db.Column(
         db.String(IDENTITY_CODE_LEN),
         db.ForeignKey('customer.c_identity_code'),
-        primary_key=True
+        primary_key=True,
+        ondelete='CASCADE', onupdate='CASCADE'
+
     )
     sar_sb_name = db.Column(
         db.String(NAME_LEN),
         db.ForeignKey('sub_bank.sb_name'),
-        primary_key=True
+        primary_key=True,
+        ondelete='CASCADE', onupdate='CASCADE'
     )
     sar_a_code = db.Column(
         db.String(CODE_LEN),
         db.ForeignKey('account.a_code'),
-        nullable=True
+        nullable=True,
+        ondelete='CASCADE', onupdate='CASCADE'
     )
     # end foreign keys
 
@@ -374,12 +393,14 @@ class LoanCustomer(db.Model):
     lc_l_code = db.Column(
         db.String(CODE_LEN),
         db.ForeignKey('loan.l_code'),
-        primary_key=True
+        primary_key=True,
+        ondelete='CASCADE', onupdate='CASCADE'
     )
     lc_c_identity_code = db.Column(
         db.String(IDENTITY_CODE_LEN),
         db.ForeignKey('customer.c_identity_code'),
-        primary_key=True
+        primary_key=True,
+        ondelete='CASCADE', onupdate='CASCADE'
     )
     # end foreign keys
 
